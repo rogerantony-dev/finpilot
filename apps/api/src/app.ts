@@ -11,7 +11,7 @@ import {
 } from 'fastify-type-provider-zod';
 import { randomUUID } from 'node:crypto';
 import type { Config } from './config.js';
-import type { Db } from './db.js';
+import type { Db } from './db/index.js';
 import { healthRoutes } from './routes/health.js';
 
 declare module 'fastify' {

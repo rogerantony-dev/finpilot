@@ -1,7 +1,7 @@
 import { healthResponseSchema } from '@finpilot/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { createRequire } from 'node:module';
-import { pingDb } from '../db.js';
+import { pingDb } from '../db/index.js';
 
 // Works from both src/ (dev) and dist/ (build): package.json is two levels up.
 const { version } = createRequire(import.meta.url)('../../package.json') as { version: string };

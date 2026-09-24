@@ -1,6 +1,6 @@
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
-import { createDb } from './db.js';
+import { createDb } from './db/index.js';
 
 const config = loadConfig();
 const db = createDb(config.DATABASE_URL);

@@ -15,7 +15,12 @@
     "format:check": "prettier --check .",
     "test": "pnpm -r test",
     "db:up": "docker compose up -d db",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @finpilot/api db:migrate",
+    "db:rollback": "pnpm --filter @finpilot/api db:rollback",
+    "db:seed": "pnpm --filter @finpilot/api db:seed",
+    "db:codegen": "pnpm --filter @finpilot/api db:codegen",
+    "db:reset": "docker compose down -v && docker compose up -d --wait db && pnpm db:migrate && pnpm db:seed"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
