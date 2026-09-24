@@ -3,8 +3,8 @@
 Investment portfolio and goal monitoring platform for an internal wealth-service
 team. Built for the FinPilot full-stack assessment using **synthetic data only**.
 
-> Status: schema, migrations and CSV seed done (Phase 2). API endpoints, UI
-> screens and the admin import screen land in later phases — see [DECISIONS.md](DECISIONS.md).
+> Status: database, seed and REST API done (Phases 1–3). UI screens and the
+> admin import screen land in later phases — see [DECISIONS.md](DECISIONS.md).
 
 ## Stack
 
@@ -48,6 +48,47 @@ pnpm dev                          # API :3000 + web :5173
 | Health       | http://localhost:3000/api/v1/health |
 | Swagger UI   | http://localhost:3000/api/docs      |
 | OpenAPI JSON | http://localhost:3000/api/docs/json |
+
+## Demo users
+
+Created by `pnpm db:seed`; passwords come from `.env` (defaults in
+`.env.example`, local demo only):
+
+| Email                  | Role   | Password (default)                          |
+| ---------------------- | ------ | ------------------------------------------- |
+| `viewer@finpilot.test` | VIEWER | `SEED_VIEWER_PASSWORD` (`viewer-demo-2026`) |
+| `admin@finpilot.test`  | ADMIN  | `SEED_ADMIN_PASSWORD` (`admin-demo-2026`)   |
+
+## API
+
+Base URL `http://localhost:3000/api/v1`. Interactive docs with request and
+response schemas at http://localhost:3000/api/docs: call `POST /auth/login`
+there and the session cookie is used for the other endpoints.
+
+| Method     | Path                           | Purpose                                 |
+| ---------- | ------------------------------ | --------------------------------------- |
+| GET        | `/health`                      | Liveness/readiness (public)             |
+| POST       | `/auth/login` · `/auth/logout` | Start / end session (httpOnly cookie)   |
+| GET        | `/auth/me`                     | Current user                            |
+| GET        | `/customers`                   | Search (`q`), filter, sort, paginate    |
+| GET        | `/customers/cities`            | Filter options                          |
+| GET        | `/customers/{id}`              | Profile + latest risk profile           |
+| GET        | `/customers/{id}/portfolio`    | Totals, accounts, allocation, positions |
+| GET        | `/customers/{id}/transactions` | Filtered, sorted, paginated ledger      |
+| GET        | `/instruments`                 | Filter options                          |
+| GET · POST | `/customers/{id}/goals`        | List / create goals                     |
+| PATCH      | `/goals/{goalId}`              | Edit a goal                             |
+
+```bash
+curl -c jar -X POST localhost:3000/api/v1/auth/login \
+  -H 'content-type: application/json' \
+  -d '{"email":"viewer@finpilot.test","password":"viewer-demo-2026"}'
+curl -b jar localhost:3000/api/v1/customers/C0002/portfolio
+```
+
+Errors always look like
+`{ "error": { "code": "VALIDATION_ERROR", "message": "…", "details": [{ "field": "…", "message": "…" }], "requestId": "…" } }`.
+Design notes: `DECISIONS.md` D7 (API) and D8 (auth).
 
 ## Environment variables
 

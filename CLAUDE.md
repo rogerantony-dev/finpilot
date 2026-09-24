@@ -120,7 +120,16 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done.
 
 ### Backend
 
-- Routes live in `apps/api/src/routes/`, registered under `/api/v1`.
+- Code is organised by area in `apps/api/src/modules/<area>/`:
+  `<area>.routes.ts` (HTTP) → `<area>.service.ts` (business rules, only when
+  there are any) → `<area>.repository.ts` (Kysely queries + snake→camel
+  mapping). Register routes in `app.ts` under `/api/v1`; anything not public
+  goes inside the `secured` scope (session required). Admin routes add
+  `preHandler: app.requireRole('ADMIN')`.
+- Request/response schemas live in `packages/shared/src/`; import them in
+  routes. JSON is camelCase; money/quantities are decimal strings.
+- Throw `AppError` / `notFound()` / `unprocessable()` (`lib/errors.ts`) for
+  expected failures; the error plugin formats every error the same way.
 - Every route declares Zod schemas for params/query/body **and** responses;
   that drives validation, serialisation and the OpenAPI document.
 - SQL through Kysely only (parameterised). No string-concatenated SQL.

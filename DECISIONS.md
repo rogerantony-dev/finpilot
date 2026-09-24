@@ -194,3 +194,83 @@ constraints, views and partial indexes are and how FinPilot uses them.
 - **Soft anomalies are imported and reported, not rejected**: trades before an
   account's open date (1,069) and activity on closed accounts appear in
   `v_data_quality_exceptions`. Rejecting them would discard ~23% of the ledger.
+- **What the admin uploads:** all seven CSVs are loaded once by the seed as
+  the starting state. The admin screen imports **daily transaction files**
+  (the brief's preferred example), same columns as `transactions.csv`. The
+  pipeline supports every dataset, so a holdings upload is a small extension.
+  Demo sample files (a clean daily file and one with mixed errors) will live
+  in `data/samples/`; re-uploading the original `transactions.csv`
+  demonstrates idempotency ("already imported").
+
+---
+
+## D7. API design
+
+- **Layers:** `routes` (HTTP only: schemas, status codes, logging) →
+  `service` (business rules, where there are any, e.g. goals) →
+  `repository` (Kysely queries, row → DTO mapping). Modules live in
+  `apps/api/src/modules/<area>/`. Read-only areas skip the service layer
+  rather than adding a pass-through file.
+- **Contracts in `packages/shared`:** each request and response is a Zod
+  schema used by Fastify for validation and serialisation, by
+  `@fastify/swagger` for the OpenAPI document, and by the web app for types.
+  The docs cannot drift from the code.
+- **Versioning:** URL prefix `/api/v1`. A breaking change would ship as `/api/v2`
+  alongside v1 until clients move.
+- **JSON uses camelCase**; the database stays snake_case. Repositories map
+  explicitly, so a column rename never silently changes the API.
+- **Money, prices and quantities are decimal strings** (`"263088.49"`) in
+  requests and responses: JSON numbers are floating point in most clients.
+  Amounts are in the account's `currency` (INR throughout the data).
+- **Error model:** every error is `{ error: { code, message, details?, requestId } }`
+  with a stable `code` (`VALIDATION_ERROR` 400, `UNAUTHENTICATED` 401,
+  `FORBIDDEN` 403, `NOT_FOUND` 404, `UNPROCESSABLE` 422, `RATE_LIMITED` 429,
+  `INTERNAL_ERROR` 500). `details` carries field-level messages. Unexpected
+  errors are logged with their stack and returned as a generic 500; stack
+  traces never reach clients. `requestId` matches the `x-request-id` header and
+  the log lines.
+- **400 vs 422:** 400 when the request is malformed (wrong type, missing field,
+  bad enum); 422 when it is well-formed but breaks a business rule (a goal
+  target date in the past).
+- **Pagination:** `page` / `pageSize` (max 100) with `totalItems` and
+  `totalPages`. Every paginated query has a unique tie-breaker in its sort, so
+  pages never overlap or skip rows. Offset pagination is fine at this scale;
+  keyset pagination (`WHERE (trade_date, transaction_id) < (...)`) is the next
+  step for large ledgers.
+- **Customer scoping:** customer sub-resources join through `accounts` on
+  `customer_id`, so passing another customer's `accountId` returns nothing
+  rather than leaking data.
+- **No N+1:** the portfolio endpoint runs four independent view queries in
+  parallel regardless of how many accounts or positions a customer has.
+- **Unrealised P/L is additive:** defined as rounded market value minus rounded
+  cost basis (migration `…0400_additive_pnl`), so cost + P/L = market value
+  exactly at position, account and customer level.
+- **Goal rules:** a target date cannot be _set_ in the past (422), but an
+  existing goal whose date has passed is kept and flagged `overdue`; funded
+  above target is allowed and flagged `overfunded`.
+
+## D8. Authentication and authorisation
+
+- **Session = signed JWT (HS256, 8 h) in an httpOnly cookie**
+  (`finpilot_session`, `SameSite=Strict`, `Path=/api`, `Secure` when
+  `COOKIE_SECURE=true`).
+  - _httpOnly_ keeps the token out of reach of page JavaScript (XSS cannot
+    read it); nothing is stored in `localStorage`.
+  - _SameSite=Strict_ means browsers never attach it to cross-site requests,
+    which covers CSRF for this same-origin app; CORS allows only `WEB_ORIGIN`.
+- **Stateless trade-off:** the role is inside the token, so authorisation needs
+  no database round trip, but a role change or logout only takes full effect
+  when the token expires (logout clears the cookie immediately). Production
+  would add short-lived access tokens plus refresh, or server-side sessions.
+- **Roles:** `VIEWER` and `ADMIN`. Every route under `/api/v1` except
+  `/health`, `/auth/login` and `/auth/logout` requires a session;
+  `app.requireRole('ADMIN')` guards admin routes (403 otherwise).
+- **Passwords:** scrypt (Node standard library) with a per-user salt, compared
+  in constant time. Unknown emails are checked against a dummy hash so response
+  time does not reveal which emails exist, and both cases return the same
+  message.
+- **Login rate limit:** 10 attempts per minute per IP (`@fastify/rate-limit`).
+- **Demo users** are created by `pnpm db:seed` with passwords from
+  `SEED_VIEWER_PASSWORD` / `SEED_ADMIN_PASSWORD`; no credentials are in code.
+- **Logs** redact `Cookie`, `Authorization` and `Set-Cookie`; login attempts,
+  forbidden access and goal changes are logged with the user ID.
