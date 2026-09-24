@@ -11,6 +11,7 @@ const config: Config = {
   DATABASE_URL: 'postgres://nobody:nothing@127.0.0.1:1/none',
   JWT_SECRET: 'x'.repeat(32),
   WEB_ORIGIN: 'http://localhost:5173',
+  COOKIE_SECURE: false,
 };
 
 describe('GET /api/v1/health', () => {
