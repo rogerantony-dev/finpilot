@@ -91,6 +91,10 @@ docs/              data audit, primers, brief
 
 ```bash
 pnpm db:up          # Postgres 17 on localhost:5433 (docker compose)
+pnpm db:migrate     # apply db/migrations (dbmate); db:rollback reverts one
+pnpm db:seed        # import data/raw CSVs via the import pipeline (idempotent)
+pnpm db:reset       # wipe volume, migrate, seed
+pnpm db:codegen     # regenerate apps/api/src/db/schema.ts after a migration
 pnpm dev            # API :3000, web :5173 (proxies /api to the API)
 pnpm lint | typecheck | test | build | format
 ```
@@ -127,8 +131,13 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done.
 
 ### Database
 
-- Schema changes only via new SQL files in `db/migrations/`; never edit an
-  applied migration.
+- Schema changes only via new SQL files in `db/migrations/` (with `-- migrate:up`
+  and `-- migrate:down`); never edit an applied migration. Run `pnpm db:codegen`
+  afterwards; `apps/api/src/db/schema.ts` is generated, never hand-edited.
+- Portfolio math lives in the views (`v_positions` etc.); query them rather
+  than re-deriving market value in TypeScript.
+- All CSV loading goes through `importCsv` (`apps/api/src/imports/`); tests run
+  against `TEST_DATABASE_URL`, recreated from migrations each run.
 - Money and quantities are `NUMERIC`, never floats.
 - Constraints belong in the database (CHECK/FK/UNIQUE) as well as in Zod.
 

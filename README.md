@@ -3,8 +3,8 @@
 Investment portfolio and goal monitoring platform for an internal wealth-service
 team. Built for the FinPilot full-stack assessment using **synthetic data only**.
 
-> Status: repository scaffold (Phase 1). Schema, API endpoints, UI screens and
-> CSV import land in later phases — see [DECISIONS.md](DECISIONS.md).
+> Status: schema, migrations and CSV seed done (Phase 2). API endpoints, UI
+> screens and the admin import screen land in later phases — see [DECISIONS.md](DECISIONS.md).
 
 ## Stack
 
@@ -36,6 +36,8 @@ docs/           Data audit, PostgreSQL primer, assignment brief
 cp .env.example .env              # then set JWT_SECRET: openssl rand -hex 32
 pnpm install
 pnpm db:up                        # PostgreSQL on localhost:5433
+pnpm db:migrate                   # create the schema from db/migrations
+pnpm db:seed                      # load data/raw/*.csv (safe to re-run)
 pnpm dev                          # API :3000 + web :5173
 ```
 
@@ -67,5 +69,17 @@ boot with missing or malformed values.
 
 ## Data
 
-The supplied CSVs live unmodified in `data/raw/`. Known data-quality issues and
-how they are handled: [docs/data-audit.md](docs/data-audit.md).
+The supplied CSVs live unmodified in `data/raw/`. `pnpm db:seed` imports them
+in foreign-key order through the same validation pipeline as the admin upload,
+and prints accepted/rejected counts plus the reason for every rejected row.
+Expected: transactions 4,550 accepted / 4 rejected; holdings 982 / 3; all
+other files fully accepted.
+
+- Data-quality issues and handling: [docs/data-audit.md](docs/data-audit.md)
+- SQL tasks and `EXPLAIN` walkthrough: [docs/sql-tasks.md](docs/sql-tasks.md)
+
+## Tests
+
+`pnpm test` recreates a separate `finpilot_test` database from the migrations
+(`TEST_DATABASE_URL`) and runs the suites against it; your seeded data is never
+touched. PostgreSQL must be running (`pnpm db:up`).

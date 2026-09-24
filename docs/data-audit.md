@@ -5,15 +5,23 @@ price date `2026-09-18`.
 
 ## Deliberate anomalies (7 rows, all appended at the end of their files)
 
-| #   | File              | Row                                               | Problem                                                                   | Handling                                                                                                                                                                |
-| --- | ----------------- | ------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | transactions      | `T0000026` (second copy, line 4551)               | Duplicate primary key; both rows byte-identical                           | Unique key on `transaction_id`; first copy loaded, second **rejected** `DUPLICATE_ID`. A duplicate ID with _different_ contents would be reported as a conflict.        |
-| 2   | transactions      | `T0004551` → `I9999`                              | Unknown instrument (invalid FK)                                           | **Rejected** `UNKNOWN_INSTRUMENT`, stored in `import_rejects`                                                                                                           |
-| 3   | transactions      | `T0004552` FEE, amount `-75`                      | Negative amount; all other amounts are positive with sign implied by type | **Rejected** `NEGATIVE_AMOUNT`; backed by `CHECK (amount > 0)`. Not auto-corrected: it may be a refund and the rule would be a guess.                                   |
-| 4   | transactions      | `T0004553` dated `2027-01-05`, PENDING            | Future trade date; price 210 vs last price 2371                           | **Rejected** `FUTURE_TRADE_DATE` (trade_date > import date)                                                                                                             |
-| 5–7 | holdings_snapshot | (A00145, I0036), (A00146, I0010), (A00147, I0049) | Exact duplicate positions for the same snapshot date                      | PK `(account_id, instrument_id, snapshot_date)`; exact copies **de-duplicated and logged**. Conflicting duplicates would reject both rows to avoid double-counting AUM. |
+| #   | File              | Row                                               | Problem                                                                   | Handling                                                                                                                                                                                                                                |
+| --- | ----------------- | ------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | transactions      | `T0000026` (second copy, file line 4552)          | Duplicate primary key; both rows byte-identical                           | Unique key on `transaction_id`; first copy (line 27) loaded, second **rejected** `DUPLICATE_ROW`. A duplicate ID with _different_ contents rejects every copy as `CONFLICTING_DUPLICATE`.                                               |
+| 2   | transactions      | `T0004551` → `I9999`                              | Unknown instrument (invalid FK)                                           | **Rejected** `UNKNOWN_REFERENCE` (instrument), stored in `import_rejects`                                                                                                                                                               |
+| 3   | transactions      | `T0004552` FEE, amount `-75`                      | Negative amount; all other amounts are positive with sign implied by type | **Rejected** `NEGATIVE_AMOUNT`; backed by `CHECK (amount > 0)`. Not auto-corrected: it may be a refund and the rule would be a guess.                                                                                                   |
+| 4   | transactions      | `T0004553` dated `2027-01-05`, PENDING            | Future trade date; price 210 vs last price 2371                           | **Rejected** `FUTURE_DATE` (trade_date > import date)                                                                                                                                                                                   |
+| 5–7 | holdings_snapshot | (A00145, I0036), (A00146, I0010), (A00147, I0049) | Exact duplicate positions for the same snapshot date                      | PK `(account_id, instrument_id, snapshot_date)`; exact copies **de-duplicated**: first kept, later copies recorded as `DUPLICATE_ROW`. Conflicting duplicates reject every copy (`CONFLICTING_DUPLICATE`) to avoid double-counting AUM. |
 
-Expected result of importing `transactions.csv`: **4,550 imported, 4 rejected**.
+Verified results (automated tests in `apps/api/test/imports/`):
+
+| File                  | Rows  | Accepted | Rejected                 |
+| --------------------- | ----- | -------- | ------------------------ |
+| transactions.csv      | 4,554 | 4,550    | 4 (file lines 4552–4555) |
+| holdings_snapshot.csv | 985   | 982      | 3 (file lines 984–986)   |
+| all other files       | —     | 100%     | 0                        |
+
+Line numbers are file lines; line 1 is the header.
 
 ## Cross-file inconsistencies (data-generation artefacts: flagged, not rejected)
 
