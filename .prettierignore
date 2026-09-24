@@ -1,0 +1,6 @@
+dist
+coverage
+pnpm-lock.yaml
+data/raw
+docs/*.docx
+apps/api/src/db/schema.ts
