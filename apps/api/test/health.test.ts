@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import type { Config } from '../src/config.js';
-import { createDb } from '../src/db.js';
+import { createDb } from '../src/db/index.js';
 
 // An unreachable database: /health must report "degraded" with 503, not crash.
 const config: Config = {
