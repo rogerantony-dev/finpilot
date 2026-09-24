@@ -1,10 +1,12 @@
-import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
+import { errorResponse } from '@finpilot/shared';
+import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import Fastify, { type FastifyServerOptions } from 'fastify';
 import {
   jsonSchemaTransform,
+  jsonSchemaTransformObject,
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
@@ -12,7 +14,14 @@ import {
 import { randomUUID } from 'node:crypto';
 import type { Config } from './config.js';
 import type { Db } from './db/index.js';
-import { healthRoutes } from './routes/health.js';
+import { authRoutes } from './modules/auth/auth.routes.js';
+import { customerRoutes } from './modules/customers/customers.routes.js';
+import { goalRoutes } from './modules/goals/goals.routes.js';
+import { portfolioRoutes } from './modules/portfolio/portfolio.routes.js';
+import { healthRoutes } from './modules/system/health.routes.js';
+import { transactionRoutes } from './modules/transactions/transactions.routes.js';
+import { authPlugin } from './plugins/auth.js';
+import { errorHandler } from './plugins/errors.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -31,6 +40,7 @@ export async function buildApp(config: Config, db: Db, opts: FastifyServerOption
     // Request correlation: honour an incoming X-Request-Id, otherwise generate one.
     requestIdHeader: 'x-request-id',
     genReqId: () => randomUUID(),
+    bodyLimit: 1024 * 1024,
     ...opts,
   }).withTypeProvider<ZodTypeProvider>();
 
@@ -44,25 +54,57 @@ export async function buildApp(config: Config, db: Db, opts: FastifyServerOption
     reply.header('x-request-id', req.id);
   });
 
+  await app.register(errorHandler);
   await app.register(cors, { origin: config.WEB_ORIGIN, credentials: true });
-  await app.register(cookie);
+  // Only routes that opt in (login) are rate limited.
+  await app.register(rateLimit, { global: false });
+  await app.register(authPlugin);
 
   await app.register(swagger, {
     openapi: {
       info: {
         title: 'FinPilot API',
-        description: 'Investment portfolio and goal monitoring API (synthetic data only).',
+        description:
+          'Investment portfolio and goal monitoring API (synthetic data only).\n\n' +
+          'Authenticate with `POST /api/v1/auth/login`; the session cookie is then sent ' +
+          'automatically (including from this page). Errors share one shape: ' +
+          '`{ error: { code, message, details?, requestId } }`.',
         version: '1.0.0',
       },
       servers: [{ url: '/' }],
+      components: {
+        securitySchemes: {
+          sessionCookie: { type: 'apiKey', in: 'cookie', name: 'finpilot_session' },
+        },
+      },
     },
     transform: jsonSchemaTransform,
+    transformObject: jsonSchemaTransformObject,
   });
   await app.register(swaggerUi, { routePrefix: '/api/docs' });
 
   await app.register(
     async (v1) => {
+      // Public
       await v1.register(healthRoutes);
+      await v1.register(authRoutes);
+
+      // Everything else requires a signed-in user.
+      await v1.register(async (secured) => {
+        secured.addHook('onRequest', secured.authenticate);
+        // Document the cookie requirement and the 401 on every secured route.
+        secured.addHook('onRoute', (route) => {
+          route.schema = {
+            ...route.schema,
+            security: [{ sessionCookie: [] }],
+            response: { ...(route.schema?.response as object), 401: errorResponse },
+          };
+        });
+        await secured.register(customerRoutes);
+        await secured.register(portfolioRoutes);
+        await secured.register(transactionRoutes);
+        await secured.register(goalRoutes);
+      });
     },
     { prefix: '/api/v1' },
   );

@@ -3,10 +3,12 @@
 // that was already imported is skipped (matched by its SHA-256).
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { z } from 'zod';
 import { loadConfig } from '../config.js';
 import { createDb } from '../db/index.js';
 import { LOAD_ORDER, type DatasetName } from '../imports/datasets.js';
 import { importCsv } from '../imports/import-service.js';
+import { seedUsers } from './users.js';
 
 const RAW_DIR = fileURLToPath(new URL('../../../../data/raw/', import.meta.url));
 
@@ -21,6 +23,13 @@ const FILES: Record<DatasetName, string> = {
 };
 
 const config = loadConfig();
+// Demo passwords come from the environment (see .env.example), never from code.
+const seedEnv = z
+  .object({
+    SEED_VIEWER_PASSWORD: z.string().min(8),
+    SEED_ADMIN_PASSWORD: z.string().min(8),
+  })
+  .parse(process.env);
 const db = createDb(config.DATABASE_URL);
 
 try {
@@ -44,6 +53,22 @@ try {
     }
   }
   console.table(summary);
+
+  const created = await seedUsers(db, [
+    {
+      email: 'viewer@finpilot.test',
+      fullName: 'Priya Menon',
+      role: 'VIEWER',
+      password: seedEnv.SEED_VIEWER_PASSWORD,
+    },
+    {
+      email: 'admin@finpilot.test',
+      fullName: 'Arjun Rao',
+      role: 'ADMIN',
+      password: seedEnv.SEED_ADMIN_PASSWORD,
+    },
+  ]);
+  console.log(`Demo users created: ${created} (existing users are left unchanged)`);
 } finally {
   await db.destroy();
 }

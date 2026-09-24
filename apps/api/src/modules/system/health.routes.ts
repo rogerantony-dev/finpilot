@@ -1,10 +1,10 @@
-import { healthResponseSchema } from '@finpilot/shared';
+import { healthResponse } from '@finpilot/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { createRequire } from 'node:module';
-import { pingDb } from '../db/index.js';
+import { pingDb } from '../../db/index.js';
 
-// Works from both src/ (dev) and dist/ (build): package.json is two levels up.
-const { version } = createRequire(import.meta.url)('../../package.json') as { version: string };
+// Works from both src/ (dev) and dist/ (build): package.json is three levels up.
+const { version } = createRequire(import.meta.url)('../../../package.json') as { version: string };
 
 const startedAt = Date.now();
 
@@ -16,7 +16,7 @@ export const healthRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['system'],
         summary: 'Liveness and readiness',
         description: 'Reports API status and database connectivity. Never exposes configuration.',
-        response: { 200: healthResponseSchema, 503: healthResponseSchema },
+        response: { 200: healthResponse, 503: healthResponse },
       },
     },
     async (_req, reply) => {

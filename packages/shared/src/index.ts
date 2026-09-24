@@ -1,15 +1,8 @@
-// Types and Zod schemas shared by the API and the web app.
-import { z } from 'zod';
-
-export const roleSchema = z.enum(['VIEWER', 'ADMIN']);
-export type Role = z.infer<typeof roleSchema>;
-
-export const healthResponseSchema = z.object({
-  status: z.enum(['ok', 'degraded']),
-  version: z.string(),
-  uptimeSeconds: z.number(),
-  checks: z.object({
-    database: z.enum(['up', 'down']),
-  }),
-});
-export type HealthResponse = z.infer<typeof healthResponseSchema>;
+// Zod schemas and types shared by the API (validation, OpenAPI) and the web app.
+export * from './auth.js';
+export * from './common.js';
+export * from './customers.js';
+export * from './goals.js';
+export * from './health.js';
+export * from './portfolio.js';
+export * from './transactions.js';
