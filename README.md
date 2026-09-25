@@ -5,8 +5,7 @@
 Investment portfolio and goal monitoring platform for an internal wealth-service
 team. Built for the FinPilot full-stack assessment using **synthetic data only**.
 
-> Status: database, seed, REST API, CI, web app and admin CSV import done
-> (Phases 1–6). Next: one-command Docker Compose and the architecture report — see [DECISIONS.md](DECISIONS.md).
+> Synthetic data only. Architecture report: [docs/architecture-report.docx](docs/architecture-report.docx). — see [DECISIONS.md](DECISIONS.md).
 
 ## Stack
 
@@ -32,12 +31,34 @@ docs/           Data audit, PostgreSQL primer, assignment brief
 - Node.js 24+ and pnpm 10 (`corepack enable`)
 - Docker (for PostgreSQL)
 
-## Local setup
+## Quick start (one command)
+
+Requires Docker only.
+
+```bash
+cp .env.example .env    # then set JWT_SECRET: openssl rand -hex 32
+docker compose up --build
+```
+
+Open **http://localhost:8088** and sign in (demo users below). Start-up order
+is automatic: PostgreSQL → `migrate` (applies migrations, imports the CSVs,
+creates demo users, then exits) → API → web. `pnpm stack:smoke` runs an
+end-to-end check against the running stack; `docker compose down -v` removes
+everything including data.
+
+| What                          | URL                            |
+| ----------------------------- | ------------------------------ |
+| App                           | http://localhost:8088          |
+| API (through the same origin) | http://localhost:8088/api/v1   |
+| Swagger UI                    | http://localhost:8088/api/docs |
+| PostgreSQL                    | `localhost:5433` (from `.env`) |
+
+## Development setup (hot reload)
 
 ```bash
 cp .env.example .env              # then set JWT_SECRET: openssl rand -hex 32
 pnpm install
-pnpm db:up                        # PostgreSQL on localhost:5433
+pnpm db:up                        # PostgreSQL only, on localhost:5433
 pnpm db:migrate                   # create the schema from db/migrations
 pnpm db:seed                      # load data/raw/*.csv (safe to re-run)
 pnpm dev                          # API :3000 + web :5173
@@ -108,7 +129,8 @@ Design notes: `DECISIONS.md` D7 (API) and D8 (auth).
 
 ## Environment variables
 
-All variables are documented in [`.env.example`](.env.example). `.env` is
+All variables are documented in [`.env.example`](.env.example). Use URL-safe
+characters in `POSTGRES_PASSWORD` (it is embedded in the connection URL). `.env` is
 git-ignored; the API validates its configuration at start-up and refuses to
 boot with missing or malformed values.
 
@@ -149,10 +171,16 @@ curl -b jar -X POST 'localhost:3000/api/v1/admin/imports/transactions?fileName=t
 ## CI
 
 GitHub Actions runs on every push to `main` and every pull request
-([runs](https://github.com/rogerantony-dev/finpilot/actions)): format check →
-lint → typecheck → dependency audit → migrations apply / roll back / re-apply
-→ generated DB types up to date → tests against PostgreSQL 17 → build. Any
-failing step fails the run. Details: `DECISIONS.md` D9.
+([runs](https://github.com/rogerantony-dev/finpilot/actions)):
+
+1. **build-and-test:** format check → lint → typecheck → dependency audit →
+   migrations apply / roll back / re-apply → generated DB types up to date →
+   tests against PostgreSQL 17 → build.
+2. **docker-stack:** builds the production images, starts the full stack with
+   `docker compose up`, runs `scripts/smoke-test.sh` through nginx, and checks
+   that a restart re-runs migrations and the seed without changes.
+
+Any failing step fails the run. Details: `DECISIONS.md` D9 and D12.
 
 ## Tests
 

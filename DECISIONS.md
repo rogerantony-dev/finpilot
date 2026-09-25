@@ -380,3 +380,50 @@ constraints, views and partial indexes are and how FinPilot uses them.
   check is convenience only; the API enforces it.
 - **Empty enum cells** are reported as `REQUIRED` (not `INVALID_ENUM`), so the
   reason tells the data provider what to fix.
+
+---
+
+## D12. Deployment: local topology and the path to production
+
+**Local (Docker Compose, `docker compose up --build`):**
+
+```
+browser ──► web (nginx, :8088 on 127.0.0.1)
+              ├─ static SPA (index.html no-cache; hashed assets cached 1 year)
+              └─ /api/* ──► api (Fastify, :3000, not published) ──► db (PostgreSQL 17)
+migrate (one-off): dbmate up → seed → exit 0, before api starts
+```
+
+- **Same origin through nginx**, like production: no CORS, the session cookie
+  is first-party, and the API is not exposed on the host.
+- **Start-up is ordered by health, not sleeps:** `db` healthy →
+  `migrate` completed successfully → `api` healthy (HTTP check of `/health`) →
+  `web`. A failed migration stops the chain: the API never starts on a
+  half-migrated schema, and dbmate runs each migration in a transaction, so
+  the failed one leaves no partial changes.
+- **Images:** multi-stage builds; the API runtime holds only `dist/`,
+  production `node_modules` (`pnpm deploy --prod`), migrations and the seed
+  CSVs, and runs as the unprivileged `node` user. The web image is
+  `nginx-unprivileged` (non-root, port 8080).
+- **Security headers** at the edge: CSP (`default-src 'self'`,
+  `frame-ancestors 'none'`), `X-Frame-Options`, `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy`; `server_tokens off`.
+- **Proxy awareness:** `TRUST_PROXY=true` so rate limiting and logs use the
+  client IP from `X-Forwarded-For`; nginx forwards its `$request_id` as
+  `X-Request-Id`, so one ID follows a request from the edge to the API logs.
+- **Configuration** only from `.env` (git-ignored); Compose refuses to start
+  when a required secret is missing (`${JWT_SECRET:?…}`).
+- **Verified in CI:** the `docker-stack` job builds the images, starts the
+  stack, runs `scripts/smoke-test.sh` and checks idempotent restart.
+
+**Production mapping (not built; the brief requires local hosting):**
+
+| Local                 | Production                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| nginx container       | Managed load balancer / CDN terminating TLS (HSTS, `COOKIE_SECURE=true`), static assets on the CDN                                                                              |
+| api container         | 2+ replicas on a container platform (ECS/Cloud Run/Kubernetes), health-checked, rolling deploys                                                                                 |
+| migrate container     | One-off release job before the new API version rolls out; migrations written backward-compatible (expand → migrate → contract) so old and new API versions can run side by side |
+| PostgreSQL container  | Managed PostgreSQL (multi-AZ, automated backups + point-in-time recovery), app connects via PgBouncer or the platform pooler                                                    |
+| `.env`                | Secret manager (rotated `JWT_SECRET`, per-service least-privilege DB roles: migration role owns DDL, app role DML only)                                                         |
+| `docker compose logs` | Central log aggregation (JSON logs, searchable by `reqId`, `batchId`, `userId`), metrics and alerts on 5xx rate, latency, failed imports                                        |
+| GitHub Actions CI     | Same pipeline plus: push signed, versioned images to a registry; deploy to staging on `main`; promote to production on approval                                                 |

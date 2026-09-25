@@ -90,6 +90,8 @@ docs/              data audit, primers, brief
 ## Commands
 
 ```bash
+docker compose up --build   # full stack on http://localhost:8088 (migrate + seed automatic)
+pnpm stack:smoke           # end-to-end check against the running stack
 pnpm db:up          # Postgres 17 on localhost:5433 (docker compose)
 pnpm db:migrate     # apply db/migrations (dbmate); db:rollback reverts one
 pnpm db:seed        # import data/raw CSVs via the import pipeline (idempotent)
