@@ -6,10 +6,13 @@ import { mergeClassName } from '../../lib/cn';
 // Inside <Form errors={...}>, Field.Error shows the server message for the
 // field whose Root has the matching `name`.
 
+/** Borderless alpha-gray input, as in Recollect. */
 const controlClass =
-  'h-10 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-ink placeholder:text-muted/70 ' +
-  'focus:outline-2 focus:-outline-offset-1 focus:outline-accent ' +
-  'data-invalid:border-loss data-invalid:bg-loss-soft/40 data-disabled:bg-paper data-disabled:text-muted';
+  'h-8 w-full rounded-lg bg-gray-alpha-100 px-2.5 text-13 leading-[115%] tracking-[0.01em] text-gray-800 ' +
+  'placeholder:text-gray-alpha-600 outline-hidden transition-colors ' +
+  'hover:bg-gray-alpha-200 focus-visible:bg-gray-0 focus-visible:ring-1 focus-visible:ring-gray-300 ' +
+  'data-invalid:bg-red-100/60 data-invalid:ring-1 data-invalid:ring-red-500/40 ' +
+  'data-disabled:opacity-60';
 
 function Root({ className, ...props }: BaseField.Root.Props) {
   return (
@@ -20,7 +23,10 @@ function Root({ className, ...props }: BaseField.Root.Props) {
 function Label({ className, ...props }: BaseField.Label.Props) {
   return (
     <BaseField.Label
-      className={mergeClassName('text-[13px] font-medium text-ink-soft', className)}
+      className={mergeClassName(
+        'text-13 leading-[115%] font-450 tracking-[0.01em] text-gray-600',
+        className,
+      )}
       {...props}
     />
   );
@@ -32,14 +38,17 @@ function Control({ className, ...props }: BaseField.Control.Props) {
 
 function Description({ className, ...props }: BaseField.Description.Props) {
   return (
-    <BaseField.Description className={mergeClassName('text-xs text-muted', className)} {...props} />
+    <BaseField.Description
+      className={mergeClassName('text-xs text-gray-500', className)}
+      {...props}
+    />
   );
 }
 
 function Error({ className, ...props }: BaseField.Error.Props) {
   return (
     <BaseField.Error
-      className={mergeClassName('text-xs font-medium text-loss', className)}
+      className={mergeClassName('text-xs font-450 text-red-700', className)}
       {...props}
     />
   );

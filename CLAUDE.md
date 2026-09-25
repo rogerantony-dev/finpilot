@@ -110,6 +110,23 @@ Remote: https://github.com/rogerantony-dev/finpilot (private), branch `main`.
 
 ## Conventions
 
+### Frontend: styling is Tailwind only, in Recollect's design system
+
+- Style with Tailwind utility classes only: no custom CSS rules, no inline
+  `style={{…}}`, no CSS modules. `src/index.css` holds just the Tailwind import,
+  the Inter `@font-face` import and the `@theme` tokens; add new tokens there
+  (they become utilities) rather than writing CSS.
+- Follow Recollect's system (`~/Developer/recollect`): Inter at `text-13` /
+  `text-[14px]`, `font-450`, `tracking-[0.01em]`; grays `gray-0…950` and alpha
+  grays (`bg-gray-alpha-100` fills, `border-gray-alpha-100` hairlines);
+  near-black primary (`bg-gray-950`); popups `rounded-xl bg-gray-50 p-1
+shadow-custom-3`; items `rounded-lg px-2 py-[5px]` with
+  `data-highlighted:bg-gray-200`. Sentence case, no uppercase tracked labels,
+  no serif display type.
+- Dynamic colours use class maps with full class names (e.g.
+  `features/customer/asset-colors.ts`), so Tailwind can see them.
+- Motion: add `motion-reduce:` variants to anything that animates.
+
 ### Frontend: UI components go through wrappers
 
 - **Never import `@base-ui/react` outside `apps/web/src/components/ui/`.**

@@ -1,13 +1,11 @@
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 
+/** A quiet surface: white with a hairline ring, no heavy borders. */
 export function Card({ className, ...props }: HTMLAttributes<HTMLElement>) {
   return (
     <section
-      className={cn(
-        'rounded-xl border border-line bg-surface shadow-[0_1px_0_rgb(27_26_23/0.04)]',
-        className,
-      )}
+      className={cn('rounded-xl bg-gray-0 ring-1 ring-gray-alpha-200', className)}
       {...props}
     />
   );
@@ -19,17 +17,12 @@ export function CardHeader({
   className,
 }: {
   title: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
   className?: string;
 }) {
   return (
-    <header
-      className={cn(
-        'flex items-center justify-between gap-3 border-b border-line px-5 py-3.5',
-        className,
-      )}
-    >
-      <h2 className="text-[13px] font-semibold tracking-[0.08em] text-muted uppercase">{title}</h2>
+    <header className={cn('flex items-center justify-between gap-3 px-4 pt-3.5 pb-2', className)}>
+      <h2 className="text-13 leading-[15px] font-medium text-gray-600">{title}</h2>
       {action}
     </header>
   );

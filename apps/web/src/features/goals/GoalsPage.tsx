@@ -20,11 +20,11 @@ export function GoalsPage() {
     <section aria-labelledby="goals-heading">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="goals-heading" className="font-display text-2xl">
+          <h2 id="goals-heading" className="text-lg font-semibold tracking-[-0.01em]">
             Financial goals
           </h2>
           {goals.data && (
-            <p className="mt-0.5 text-sm text-muted">
+            <p className="mt-0.5 text-sm text-gray-500">
               {goals.data.length} goal{goals.data.length === 1 ? '' : 's'}
               {flagged > 0 && ` · ${flagged} need attention`} · funded % = funded ÷ target
             </p>

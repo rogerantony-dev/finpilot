@@ -172,7 +172,7 @@ export function GoalDialog({ customerId, goal, open, onOpenChange }: GoalDialogP
         {formError && (
           <p
             role="alert"
-            className="rounded-md border border-loss/25 bg-loss-soft px-3 py-2 text-sm text-loss"
+            className="rounded-md border border-red-500/20 bg-red-100 px-3 py-2 text-sm text-loss"
           >
             {formError}
           </p>

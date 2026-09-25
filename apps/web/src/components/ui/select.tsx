@@ -47,36 +47,41 @@ export function Select({
     >
       <div className={cn('flex flex-col gap-1.5', className)}>
         <BaseSelect.Label
-          className={cn('text-[13px] font-medium text-ink-soft', hideLabel && 'sr-only')}
+          className={cn(
+            'text-13 leading-[115%] font-450 tracking-[0.01em] text-gray-600',
+            hideLabel && 'sr-only',
+          )}
         >
           {label}
         </BaseSelect.Label>
         <BaseSelect.Trigger
           className={cn(
-            'flex h-10 w-full min-w-36 items-center justify-between gap-2 rounded-md border border-line-strong bg-surface pr-2 pl-3 text-left text-sm text-ink',
-            'hover:not-data-disabled:bg-paper focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent',
-            'data-disabled:opacity-60 data-popup-open:bg-paper',
+            'flex h-8 w-full min-w-36 cursor-pointer items-center justify-between gap-2 rounded-lg bg-gray-alpha-100 pr-1.5 pl-2.5 text-left',
+            'text-13 leading-[115%] font-450 tracking-[0.01em] text-gray-800 outline-hidden transition-colors',
+            'hover:not-data-disabled:bg-gray-alpha-200 focus-visible:ring-1 focus-visible:ring-gray-300',
+            'data-disabled:opacity-60 data-popup-open:bg-gray-alpha-200',
           )}
         >
           <BaseSelect.Value
-            className="truncate data-placeholder:text-muted"
+            className="truncate data-placeholder:text-gray-alpha-600"
             placeholder={placeholder}
           />
-          <BaseSelect.Icon className="text-muted">
-            <ChevronsUpDown size={14} aria-hidden />
+          <BaseSelect.Icon className="text-gray-500">
+            <ChevronsUpDown size={13} aria-hidden />
           </BaseSelect.Icon>
         </BaseSelect.Trigger>
       </div>
       <BaseSelect.Portal>
         <BaseSelect.Positioner
-          className="z-50 outline-none"
-          sideOffset={4}
+          className="z-50 outline-none select-none"
+          sideOffset={6}
           alignItemWithTrigger={false}
         >
           <BaseSelect.Popup
             className={cn(
-              'max-h-[min(var(--available-height),20rem)] min-w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-y-auto rounded-md border border-line bg-surface py-1 text-sm shadow-lg shadow-ink/10',
-              'transition-[scale,opacity] duration-100 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0',
+              'max-h-[min(var(--available-height),20rem)] min-w-[var(--anchor-width)] origin-(--transform-origin) overflow-y-auto rounded-xl bg-gray-50 p-1',
+              'shadow-custom-3 ring-1 ring-black/5 outline-hidden transition-[transform,scale,opacity] motion-reduce:transition-none',
+              'data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0',
             )}
           >
             <BaseSelect.List>
@@ -84,10 +89,10 @@ export function Select({
                 <BaseSelect.Item
                   key={o.value}
                   value={o.value}
-                  className="grid cursor-default grid-cols-[1rem_1fr] items-center gap-2 py-1.5 pr-4 pl-2.5 outline-none select-none data-highlighted:bg-accent-soft data-selected:font-medium"
+                  className="grid cursor-pointer grid-cols-[0.875rem_1fr] items-center gap-1.5 rounded-lg px-2 py-[5px] text-13 leading-[115%] font-450 tracking-[0.01em] text-gray-800 outline-hidden select-none data-highlighted:bg-gray-200 data-highlighted:text-gray-900"
                 >
-                  <BaseSelect.ItemIndicator className="text-accent">
-                    <Check size={14} aria-hidden />
+                  <BaseSelect.ItemIndicator className="text-gray-800">
+                    <Check size={13} aria-hidden />
                   </BaseSelect.ItemIndicator>
                   <BaseSelect.ItemText className="col-start-2">{o.label}</BaseSelect.ItemText>
                 </BaseSelect.Item>

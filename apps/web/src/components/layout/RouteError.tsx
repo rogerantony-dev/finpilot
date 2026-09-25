@@ -15,18 +15,18 @@ function ErrorPage({ notFound }: { notFound: boolean }) {
   return (
     <main className="grid min-h-[60dvh] place-items-center px-4 text-center">
       <div>
-        <p className="font-display text-5xl text-line-strong">{notFound ? '404' : 'Oops'}</p>
-        <h1 className="mt-2 font-display text-2xl">
+        <p className="text-13 font-450 text-gray-500">{notFound ? '404' : 'Error'}</p>
+        <h1 className="mt-1 text-xl font-semibold tracking-[-0.01em] text-gray-900">
           {notFound ? 'Page not found' : 'Something went wrong'}
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-1 text-13 tracking-[0.01em] text-gray-600">
           {notFound
             ? 'That page does not exist.'
             : 'The page hit an unexpected error. Reloading usually helps.'}
         </p>
         <Link
           to="/"
-          className="mt-6 inline-block text-sm font-medium text-accent underline-offset-4 hover:underline"
+          className="mt-5 inline-flex h-8 items-center rounded-xl bg-gray-950 px-3 text-13 font-medium text-gray-0 shadow-custom-2 hover:bg-gray-700"
         >
           Back to customers
         </Link>

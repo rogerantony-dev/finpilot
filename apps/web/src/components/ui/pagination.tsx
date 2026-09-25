@@ -16,25 +16,25 @@ export function Pagination({
   return (
     <nav
       aria-label="Pagination"
-      className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm text-muted"
+      className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-13 tracking-[0.01em] text-gray-600"
     >
-      <p aria-live="polite" className="numeric">
+      <p aria-live="polite" className="tabular-nums">
         {first}–{last} of {page.totalItems.toLocaleString('en-IN')} {itemLabel}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <Button
-          variant="secondary"
+          variant="ghost"
           size="sm"
           disabled={page.page <= 1}
           onClick={() => onPageChange(page.page - 1)}
         >
           <ChevronLeft size={14} aria-hidden /> Previous
         </Button>
-        <span className="numeric px-1">
-          Page {page.page} of {page.totalPages}
+        <span className="tabular-nums px-2 text-gray-500">
+          {page.page} / {page.totalPages}
         </span>
         <Button
-          variant="secondary"
+          variant="ghost"
           size="sm"
           disabled={page.page >= page.totalPages}
           onClick={() => onPageChange(page.page + 1)}

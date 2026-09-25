@@ -40,10 +40,7 @@ export function OverviewPage() {
       </div>
 
       <section aria-labelledby="accounts-heading">
-        <h2
-          id="accounts-heading"
-          className="mb-3 text-[13px] font-semibold tracking-[0.08em] text-muted uppercase"
-        >
+        <h2 id="accounts-heading" className="mb-3 text-13 font-medium text-gray-600">
           Accounts
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -63,13 +60,11 @@ function PortfolioSummary({ portfolio: p }: { portfolio: Portfolio }) {
     <Card className="overflow-hidden">
       <div className="grid gap-6 p-6 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-            Portfolio value
-          </p>
-          <p className="numeric mt-1 font-display text-5xl tracking-tight">
+          <p className="text-13 font-450 text-gray-500">Portfolio value</p>
+          <p className="tabular-nums mt-1.5 text-[32px] leading-none font-semibold tracking-[-0.02em]">
             {formatMoney(p.totals.marketValue)}
           </p>
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-2 text-xs text-gray-500">
             {p.priceAsOf ? (
               <>
                 Prices as of <time dateTime={p.priceAsOf}>{formatDate(p.priceAsOf)}</time> ·
@@ -82,15 +77,20 @@ function PortfolioSummary({ portfolio: p }: { portfolio: Portfolio }) {
           </p>
         </div>
         <Stat label="Unrealised gain / loss">
-          <Pnl value={p.totals.unrealisedPnl} className="font-display text-2xl" />
+          <Pnl
+            value={p.totals.unrealisedPnl}
+            className="text-lg font-semibold tracking-[-0.01em]"
+          />
           <span className={signOf(returnPct) < 0 ? 'text-loss' : 'text-gain'}>
             {' '}
             {formatPct(returnPct, { signed: true })}
           </span>
         </Stat>
         <Stat label="Invested (cost basis)">
-          <span className="numeric font-display text-2xl">{formatMoney(p.totals.costBasis)}</span>
-          <span className="block text-muted">
+          <span className="tabular-nums text-lg font-semibold tracking-[-0.01em]">
+            {formatMoney(p.totals.costBasis)}
+          </span>
+          <span className="block text-gray-500">
             {p.totals.positionCount} positions · {p.totals.accountCount} accounts
           </span>
         </Stat>
@@ -101,8 +101,8 @@ function PortfolioSummary({ portfolio: p }: { portfolio: Portfolio }) {
 
 function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="border-line md:border-l md:pl-6">
-      <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{label}</p>
+    <div className="border-gray-alpha-100 md:border-l md:pl-6">
+      <p className="text-13 font-450 text-gray-500">{label}</p>
       <p className="mt-2 text-sm">{children}</p>
     </div>
   );
@@ -112,20 +112,22 @@ const statusTone = { ACTIVE: 'accent', DORMANT: 'warn', CLOSED: 'muted' } as con
 
 function AccountCard({ account: a }: { account: AccountValuation }) {
   return (
-    <article className="rounded-xl border border-line bg-surface p-4">
+    <article className="rounded-xl border border-gray-alpha-100 bg-gray-0 p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="font-medium">{humanize(a.accountType)}</p>
-          <p className="text-xs text-muted">
+          <p className="text-xs text-gray-500">
             {a.provider} · <span className="font-mono">{a.accountId}</span>
           </p>
         </div>
-        <Badge tone={statusTone[a.status]}>{a.status.toLowerCase()}</Badge>
+        <Badge tone={statusTone[a.status]}>{humanize(a.status)}</Badge>
       </div>
-      <p className="numeric mt-4 font-display text-2xl">{formatMoney(a.marketValue)}</p>
+      <p className="tabular-nums mt-4 text-lg font-semibold tracking-[-0.01em]">
+        {formatMoney(a.marketValue)}
+      </p>
       <p className="mt-0.5 text-sm">
         <Pnl value={a.unrealisedPnl} />{' '}
-        <span className="text-muted">· {a.positionCount} positions</span>
+        <span className="text-gray-500">· {a.positionCount} positions</span>
       </p>
     </article>
   );
@@ -148,7 +150,7 @@ function GoalSummary({ customerId }: { customerId: string }) {
         action={
           <Link
             to="goals"
-            className="inline-flex items-center gap-1 text-sm text-accent hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-gray-900 hover:underline"
           >
             All goals <ArrowRight size={14} aria-hidden />
           </Link>

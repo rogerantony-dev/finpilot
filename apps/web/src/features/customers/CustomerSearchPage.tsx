@@ -66,16 +66,16 @@ export function CustomerSearchPage() {
   }
 
   return (
-    <div className="animate-rise">
+    <div className="">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl tracking-tight">Customers</h1>
-          <p className="mt-1 text-sm text-muted">Search by name, customer ID, email or city.</p>
+          <h1 className="text-xl font-semibold tracking-[-0.01em]">Customers</h1>
+          <p className="mt-1 text-sm text-gray-500">Search by name, customer ID, email or city.</p>
         </div>
       </header>
 
       <Card>
-        <div className="flex flex-wrap items-end gap-3 border-b border-line p-4">
+        <div className="flex flex-wrap items-end gap-3 border-b border-gray-alpha-100 p-4">
           <form
             role="search"
             onSubmit={handleSearch}
@@ -169,15 +169,15 @@ export function CustomerSearchPage() {
                       <Td>
                         <Link
                           to={`/customers/${c.customerId}`}
-                          className="font-medium text-ink decoration-accent/40 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
+                          className="font-medium text-gray-900 decoration-gray-300 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-gray-400"
                         >
                           {c.fullName}
                         </Link>
                       </Td>
-                      <Td className="font-mono text-xs text-muted">{c.customerId}</Td>
-                      <Td className="hidden text-muted md:table-cell">{c.email}</Td>
+                      <Td className="font-mono text-xs text-gray-500">{c.customerId}</Td>
+                      <Td className="hidden text-gray-500 md:table-cell">{c.email}</Td>
                       <Td>
-                        {c.city} <span className="text-muted">· {c.state}</span>
+                        {c.city} <span className="text-gray-500">· {c.state}</span>
                       </Td>
                       <Td>
                         <KycBadge status={c.kycStatus} />
@@ -193,7 +193,7 @@ export function CustomerSearchPage() {
             {customers.data && customers.data.page.totalItems === 0 && (
               <EmptyState title="No customers match">
                 Try a shorter search or{' '}
-                <button className="text-accent underline" onClick={clear}>
+                <button className="text-gray-900 underline" onClick={clear}>
                   clear the filters
                 </button>
                 .

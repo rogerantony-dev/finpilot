@@ -76,10 +76,10 @@ export function TransactionsPage() {
 
   return (
     <Card>
-      <div className="border-b border-line p-4">
+      <div className="border-b border-gray-alpha-100 p-4">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-display text-2xl">Transactions</h2>
-          <p className="flex items-center gap-2 text-xs text-muted">
+          <h2 className="text-lg font-semibold tracking-[-0.01em]">Transactions</h2>
+          <p className="flex items-center gap-2 text-xs text-gray-500">
             <Badge tone="warn">Pending</Badge> not yet settled
             <Badge tone="muted" className="line-through">
               Reversed
@@ -215,8 +215,8 @@ export function TransactionsPage() {
 }
 
 const typeClass: Record<string, string> = {
-  BUY: 'text-ink',
-  SELL: 'text-ink',
+  BUY: 'text-gray-900',
+  SELL: 'text-gray-900',
   DIVIDEND: 'text-gain',
   FEE: 'text-loss',
 };
@@ -225,29 +225,26 @@ function TxRow({ t }: { t: Transaction }) {
   const reversed = t.status === 'REVERSED';
   const cash = t.transactionType === 'DIVIDEND' || t.transactionType === 'FEE';
   return (
-    <Tr className={cn(reversed && 'text-muted', t.status === 'PENDING' && 'bg-warn-soft/35')}>
-      <Td className="numeric whitespace-nowrap">
+    <Tr className={cn(reversed && 'text-gray-500', t.status === 'PENDING' && 'bg-amber-100/40')}>
+      <Td className="tabular-nums whitespace-nowrap">
         <time dateTime={t.tradeDate}>{formatDate(t.tradeDate)}</time>
-        <span className="block font-mono text-[10px] text-muted">{t.transactionId}</span>
+        <span className="block font-mono text-[10px] text-gray-500">{t.transactionId}</span>
       </Td>
-      <Td
-        className={cn(
-          'text-xs font-semibold tracking-wide uppercase',
-          !reversed && typeClass[t.transactionType],
-        )}
-      >
-        {t.transactionType}
+      <Td className={cn('text-13 font-450', !reversed && typeClass[t.transactionType])}>
+        {humanize(t.transactionType)}
       </Td>
       <Td>
         <span className="block max-w-56 truncate">{t.instrumentName}</span>
-        <span className="font-mono text-[11px] text-muted">{t.symbol}</span>
+        <span className="font-mono text-[11px] text-gray-500">{t.symbol}</span>
       </Td>
-      <Td className="hidden font-mono text-xs text-muted md:table-cell">{t.accountId}</Td>
-      <Td numeric>{cash ? <span className="text-muted">—</span> : formatQuantity(t.quantity)}</Td>
+      <Td className="hidden font-mono text-xs text-gray-500 md:table-cell">{t.accountId}</Td>
+      <Td numeric>
+        {cash ? <span className="text-gray-500">—</span> : formatQuantity(t.quantity)}
+      </Td>
       <Td numeric className="hidden sm:table-cell">
-        {cash ? <span className="text-muted">—</span> : formatMoney(t.price)}
+        {cash ? <span className="text-gray-500">—</span> : formatMoney(t.price)}
       </Td>
-      <Td numeric className={cn('font-medium', reversed && 'line-through decoration-loss/60')}>
+      <Td numeric className={cn('font-medium', reversed && 'line-through decoration-red-500/60')}>
         {formatMoney(t.amount)}
       </Td>
       <Td>

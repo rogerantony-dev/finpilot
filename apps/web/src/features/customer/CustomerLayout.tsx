@@ -24,7 +24,7 @@ export function CustomerLayout() {
       customer.error instanceof ApiError && [400, 404].includes(customer.error.status);
     return notFound ? (
       <EmptyState title={`No customer ${customerId}`}>
-        <Link to="/" className="text-accent underline">
+        <Link to="/" className="text-gray-900 underline">
           Back to search
         </Link>
       </EmptyState>
@@ -34,10 +34,10 @@ export function CustomerLayout() {
   }
 
   return (
-    <div className="animate-rise">
+    <div className="">
       <Link
         to="/"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-ink"
+        className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
       >
         <ArrowLeft size={14} aria-hidden /> Customers
       </Link>
@@ -46,7 +46,7 @@ export function CustomerLayout() {
 
       <nav
         aria-label="Customer sections"
-        className="mt-6 mb-6 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line [scrollbar-width:none]"
+        className="mt-6 mb-5 flex gap-0.5 overflow-x-auto [scrollbar-width:none]"
       >
         {tabs.map((t) => (
           <NavLink
@@ -55,10 +55,8 @@ export function CustomerLayout() {
             end={t.end}
             className={({ isActive }) =>
               cn(
-                '-mb-px border-b-2 px-3 pt-1 pb-2.5 text-sm whitespace-nowrap transition-colors',
-                isActive
-                  ? 'border-accent font-medium text-ink'
-                  : 'border-transparent text-muted hover:text-ink',
+                'flex h-8 items-center rounded-lg px-2.5 text-[14px] leading-[115%] font-450 tracking-[0.01em] whitespace-nowrap outline-hidden transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-1 focus-visible:ring-gray-200',
+                isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600',
               )
             }
           >
@@ -77,10 +75,8 @@ function CustomerHeader({ customer: c }: { customer: CustomerDetail }) {
   return (
     <header className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div>
-        <p className="font-mono text-xs tracking-wider text-muted">{c.customerId}</p>
-        <h1 className="mt-1 font-display text-4xl leading-tight tracking-tight sm:text-5xl">
-          {c.fullName}
-        </h1>
+        <p className="font-mono text-xs tracking-wider text-gray-500">{c.customerId}</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-[-0.015em]">{c.fullName}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <KycBadge status={c.kycStatus} />
           <SegmentBadge segment={c.segment} />
@@ -95,19 +91,16 @@ function CustomerHeader({ customer: c }: { customer: CustomerDetail }) {
 
       <section
         aria-labelledby="risk-heading"
-        className="rounded-xl border border-line bg-surface p-4"
+        className="rounded-xl border border-gray-alpha-100 bg-gray-0 p-4"
       >
-        <h2
-          id="risk-heading"
-          className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase"
-        >
+        <h2 id="risk-heading" className="text-13 font-450 text-gray-500">
           Risk profile
         </h2>
         {risk ? (
           <>
             <p className="mt-2 flex items-baseline gap-2">
-              <span className="font-display text-3xl">{risk.riskLevel}</span>
-              <span className="numeric text-sm text-muted">{risk.riskScore}/100</span>
+              <span className="text-xl font-semibold tracking-[-0.01em]">{risk.riskLevel}</span>
+              <span className="tabular-nums text-sm text-gray-500">{risk.riskScore}/100</span>
             </p>
             <Meter
               className="mt-2"
@@ -117,16 +110,16 @@ function CustomerHeader({ customer: c }: { customer: CustomerDetail }) {
               tone={risk.riskScore >= 75 ? 'loss' : risk.riskScore >= 55 ? 'warn' : 'accent'}
             />
             <dl className="mt-3 grid grid-cols-2 gap-y-1 text-sm">
-              <dt className="text-muted">Horizon</dt>
-              <dd className="numeric text-right">{risk.horizonYears} years</dd>
-              <dt className="text-muted">Liquidity need</dt>
+              <dt className="text-gray-500">Horizon</dt>
+              <dd className="tabular-nums text-right">{risk.horizonYears} years</dd>
+              <dt className="text-gray-500">Liquidity need</dt>
               <dd className="text-right">{humanize(risk.liquidityNeed)}</dd>
-              <dt className="text-muted">Assessed</dt>
+              <dt className="text-gray-500">Assessed</dt>
               <dd className="text-right">{formatDate(risk.assessedAt)}</dd>
             </dl>
           </>
         ) : (
-          <p className="mt-2 text-sm text-muted">No risk assessment on file.</p>
+          <p className="mt-2 text-sm text-gray-500">No risk assessment on file.</p>
         )}
       </section>
     </header>
@@ -136,7 +129,7 @@ function CustomerHeader({ customer: c }: { customer: CustomerDetail }) {
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex gap-2">
-      <dt className="w-28 shrink-0 text-muted">{label}</dt>
+      <dt className="w-28 shrink-0 text-gray-500">{label}</dt>
       <dd className="truncate">{value}</dd>
     </div>
   );

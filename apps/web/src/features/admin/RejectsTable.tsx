@@ -19,7 +19,7 @@ export function RejectsTable({ rows, caption }: { rows: RejectedRow[]; caption: 
       <tbody>
         {rows.map((r) => (
           <Tr key={r.line} className="align-top">
-            <Td numeric className="align-top text-muted">
+            <Td numeric className="align-top text-gray-500">
               {r.line}
             </Td>
             <Td className="align-top font-mono text-xs">{r.recordKey ?? '—'}</Td>
@@ -35,11 +35,11 @@ export function RejectsTable({ rows, caption }: { rows: RejectedRow[]; caption: 
             </Td>
             <Td className="align-top">
               <details className="text-xs">
-                <summary className="cursor-pointer text-accent select-none">View row</summary>
+                <summary className="cursor-pointer text-gray-900 select-none">View row</summary>
                 <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 font-mono">
                   {Object.entries(r.raw).map(([k, v]) => (
                     <div key={k} className="contents">
-                      <dt className="text-muted">{k}</dt>
+                      <dt className="text-gray-500">{k}</dt>
                       <dd className="break-all">
                         {v === '' ? <em className="text-loss">empty</em> : v}
                       </dd>

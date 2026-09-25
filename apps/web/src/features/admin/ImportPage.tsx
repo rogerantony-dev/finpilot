@@ -63,10 +63,10 @@ export function ImportPage() {
   }
 
   return (
-    <div className="grid gap-6 animate-rise">
+    <div className="grid gap-6">
       <header>
-        <h1 className="font-display text-4xl tracking-tight">Import transactions</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">
+        <h1 className="text-xl font-semibold tracking-[-0.01em]">Import transactions</h1>
+        <p className="mt-1 max-w-2xl text-sm text-gray-500">
           Upload a daily transactions file. Every row is validated; valid rows are added to the
           ledger in one step and rejected rows are listed with the reason. Existing transactions are
           never overwritten, and uploading the same file twice changes nothing.
@@ -88,14 +88,14 @@ export function ImportPage() {
               void choose(e.dataTransfer.files[0]);
             }}
             className={cn(
-              'flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-line-strong bg-paper/50 px-6 py-8 text-center transition-colors',
-              'hover:border-accent/60 focus-within:outline-2 focus-within:outline-accent',
-              dragging && 'border-accent bg-accent-soft/40',
+              'flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-gray-alpha-300 bg-gray-alpha-50 px-6 py-8 text-center transition-colors',
+              'hover:border-gray-alpha-300 focus-within:outline-2 focus-within:outline-gray-400',
+              dragging && 'border-gray-900 bg-gray-100',
             )}
           >
-            <Upload className="text-muted" size={24} aria-hidden />
+            <Upload className="text-gray-500" size={24} aria-hidden />
             <span className="font-medium">Choose a CSV file or drop it here</span>
-            <span className="text-xs text-muted">.csv, up to 5 MB</span>
+            <span className="text-xs text-gray-500">.csv, up to 5 MB</span>
             <input
               ref={inputRef}
               type="file"
@@ -105,25 +105,25 @@ export function ImportPage() {
               onChange={(e) => void choose(e.target.files?.[0])}
             />
           </label>
-          <p className="text-xs text-muted">
-            Required columns: <code className="font-mono text-[11px] text-ink-soft">{COLUMNS}</code>
+          <p className="text-xs text-gray-500">
+            Required columns: <code className="font-mono text-[11px] text-gray-700">{COLUMNS}</code>
           </p>
 
           {fileError && (
             <p
               role="alert"
-              className="rounded-md border border-loss/25 bg-loss-soft px-3 py-2 text-sm text-loss"
+              className="rounded-md border border-red-500/20 bg-red-100 px-3 py-2 text-sm text-loss"
             >
               {fileError}
             </p>
           )}
 
           {selected && (
-            <div className="flex flex-wrap items-center gap-4 rounded-lg border border-line bg-surface p-4">
-              <FileSpreadsheet className="text-accent" size={28} aria-hidden />
+            <div className="flex flex-wrap items-center gap-4 rounded-lg border border-gray-alpha-100 bg-gray-0 p-4">
+              <FileSpreadsheet className="text-gray-900" size={28} aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{selected.file.name}</p>
-                <p className="numeric text-xs text-muted">
+                <p className="tabular-nums text-xs text-gray-500">
                   {formatBytes(selected.file.size)} · {selected.rows.toLocaleString('en-IN')} data
                   rows
                 </p>
@@ -150,7 +150,7 @@ export function ImportPage() {
           {importer.isError && (
             <p
               role="alert"
-              className="rounded-md border border-loss/25 bg-loss-soft px-3 py-2 text-sm text-loss"
+              className="rounded-md border border-red-500/20 bg-red-100 px-3 py-2 text-sm text-loss"
             >
               {importer.error instanceof ApiError && importer.error.status === 422
                 ? `The file was not imported: ${importer.error.message}`
@@ -187,15 +187,15 @@ function ResultCard({ result: r }: { result: ImportResult }) {
       <div className="grid gap-5 p-5">
         <div className="flex items-start gap-3">
           {already ? (
-            <Info className="mt-0.5 text-warn" size={22} aria-hidden />
+            <Info className="mt-0.5 text-amber-700" size={22} aria-hidden />
           ) : (
             <CheckCircle2 className="mt-0.5 text-gain" size={22} aria-hidden />
           )}
           <div>
-            <p className="font-display text-2xl">
+            <p className="text-lg font-semibold tracking-[-0.01em]">
               {already ? 'Already imported, nothing changed' : `Imported as batch #${r.batchId}`}
             </p>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-gray-500">
               {already
                 ? `This exact file was imported before as batch #${r.batchId} (${r.fileName}). The counts below are from that import.`
                 : `${r.fileName}: valid rows were added to the ledger; rejected rows were not.`}
@@ -214,12 +214,12 @@ function ResultCard({ result: r }: { result: ImportResult }) {
         </dl>
 
         {!already && r.rejectedRows > 0 && (
-          <div className="overflow-hidden rounded-lg border border-line">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-paper/60 px-4 py-2.5">
+          <div className="overflow-hidden rounded-lg border border-gray-alpha-100">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-alpha-100 bg-gray-alpha-50 px-4 py-2.5">
               <p className="text-sm font-medium">
                 Rejected rows{' '}
                 {r.rejectsTruncated && (
-                  <span className="font-normal text-muted">
+                  <span className="font-normal text-gray-500">
                     (first {r.rejects.length}; see all in the history below)
                   </span>
                 )}
@@ -238,11 +238,11 @@ function ResultCard({ result: r }: { result: ImportResult }) {
 
 function Stat({ label, value, tone }: { label: string; value: number; tone?: 'gain' | 'loss' }) {
   return (
-    <div className="rounded-lg border border-line bg-paper/40 p-4">
-      <dt className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{label}</dt>
+    <div className="rounded-lg border border-gray-alpha-100 bg-gray-alpha-50 p-4">
+      <dt className="text-13 font-450 text-gray-500">{label}</dt>
       <dd
         className={cn(
-          'numeric mt-1 font-display text-3xl',
+          'tabular-nums mt-1 text-xl font-semibold tracking-[-0.01em]',
           tone === 'gain' && 'text-gain',
           tone === 'loss' && 'text-loss',
         )}
@@ -301,18 +301,18 @@ function History() {
                         <button
                           type="button"
                           onClick={() => setViewing(b)}
-                          className="font-medium text-loss underline decoration-loss/40 underline-offset-4 hover:decoration-loss"
+                          className="font-medium text-loss underline decoration-red-500/40 underline-offset-4 hover:decoration-red-500"
                         >
                           {b.rejectedRows.toLocaleString('en-IN')}
                         </button>
                       ) : (
-                        <span className="text-muted">0</span>
+                        <span className="text-gray-500">0</span>
                       )}
                     </Td>
-                    <Td className="hidden text-muted lg:table-cell">
+                    <Td className="hidden text-gray-500 lg:table-cell">
                       {b.uploadedBy ?? 'Initial seed'}
                     </Td>
-                    <Td className="hidden whitespace-nowrap text-muted sm:table-cell">
+                    <Td className="hidden whitespace-nowrap text-gray-500 sm:table-cell">
                       {formatDateTime(b.finishedAt)}
                     </Td>
                   </Tr>
@@ -349,7 +349,7 @@ function BatchRejectsDialog({ batch, onClose }: { batch: ImportBatch; onClose: (
       size="lg"
       description={`${batch.fileName} · ${batch.rejectedRows.toLocaleString('en-IN')} of ${batch.totalRows.toLocaleString('en-IN')} rows rejected`}
     >
-      <div className="-mx-6 max-h-[60dvh] overflow-y-auto border-y border-line">
+      <div className="-mx-6 max-h-[60dvh] overflow-y-auto border-y border-gray-alpha-100">
         {rejects.isError ? (
           <ErrorState error={rejects.error} onRetry={() => rejects.refetch()} />
         ) : rejects.data ? (

@@ -2,10 +2,10 @@ import { Meter as BaseMeter } from '@base-ui/react/meter';
 import { cn } from '../../lib/cn';
 
 const tones = {
-  accent: 'bg-accent',
-  warn: 'bg-warn',
-  loss: 'bg-loss',
-  muted: 'bg-muted',
+  accent: 'bg-gray-900',
+  warn: 'bg-amber-500',
+  loss: 'bg-red-500',
+  muted: 'bg-gray-400',
 } as const;
 
 export interface MeterProps {
@@ -35,12 +35,15 @@ export function Meter({
       aria-valuetext={valueText}
       className={cn('flex flex-col gap-1', className)}
     >
-      <BaseMeter.Label className={cn('text-xs text-muted', hideLabel && 'sr-only')}>
+      <BaseMeter.Label className={cn('text-xs text-gray-600', hideLabel && 'sr-only')}>
         {label}
       </BaseMeter.Label>
-      <BaseMeter.Track className="h-1.5 w-full overflow-hidden rounded-full bg-line">
+      <BaseMeter.Track className="h-1 w-full overflow-hidden rounded-full bg-gray-alpha-200">
         <BaseMeter.Indicator
-          className={cn('h-full rounded-full transition-[width] duration-500', tones[tone])}
+          className={cn(
+            'h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none',
+            tones[tone],
+          )}
         />
       </BaseMeter.Track>
     </BaseMeter.Root>

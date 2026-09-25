@@ -338,9 +338,14 @@ constraints, views and partial indexes are and how FinPilot uses them.
   for screen readers and paired with a visible data table; meters announce
   values (`aria-valuetext`); dialogs trap and restore focus; reduced-motion is
   respected.
-- **Visual design:** a restrained "ledger" look (warm paper, ink, one deep-green
-  accent, serif display type with tabular figures) suited to an internal
-  finance tool. Fonts are self-hosted via Fontsource (no third-party requests).
+- **Visual design follows Recollect's design system:** Inter variable
+  (self-hosted, `opsz` 20, metric-matched Arial fallback) at 13–14px / weight
+  450 with slight positive tracking; neutral grays on white with alpha grays
+  (3–12% black) for fills and hairlines; a near-black primary; borderless
+  alpha-gray inputs; `rounded-xl` popups with layered shadows; a left side pane
+  whose items fill gray-100 on hover and when current. Class patterns are taken
+  from Recollect's Base UI wrappers so the two products feel related. Fonts are
+  self-hosted (no third-party requests).
 - **Code splitting:** customer pages are lazy routes, so the chart library
   loads only on the overview; the initial bundle is ~107 kB gzipped.
 - **Dates** are formatted from the `YYYY-MM-DD` string directly (no `Date`

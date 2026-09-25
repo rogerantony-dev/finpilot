@@ -5,7 +5,9 @@ import { formatSignedMoney, signOf } from '../../lib/format';
 export function Pnl({ value, className }: { value: string; className?: string }) {
   const sign = signOf(value);
   return (
-    <span className={cn('numeric', sign > 0 && 'text-gain', sign < 0 && 'text-loss', className)}>
+    <span
+      className={cn('tabular-nums', sign > 0 && 'text-gain', sign < 0 && 'text-loss', className)}
+    >
       {formatSignedMoney(value)}
     </span>
   );

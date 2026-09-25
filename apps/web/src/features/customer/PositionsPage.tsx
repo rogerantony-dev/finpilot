@@ -13,10 +13,11 @@ import {
   Th,
   Tr,
 } from '../../components/ui';
+import { cn } from '../../lib/cn';
 import { formatDate, formatMoney, formatPct, formatQuantity, humanize } from '../../lib/format';
 import { useUrlState } from '../../lib/use-url-state';
 import { usePortfolio } from './api';
-import { ASSET_COLORS } from './asset-colors';
+import { assetClassColor } from './asset-colors';
 import { Pnl } from './Money';
 
 type SortKey = 'instrumentName' | 'assetClass' | 'marketValue' | 'unrealisedPnl';
@@ -53,11 +54,11 @@ export function PositionsPage() {
 
   return (
     <Card>
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line p-4">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-gray-alpha-100 p-4">
         <div>
-          <h2 className="font-display text-2xl">Positions</h2>
+          <h2 className="text-lg font-semibold tracking-[-0.01em]">Positions</h2>
           {p?.snapshotDate && (
-            <p className="text-xs text-muted">
+            <p className="text-xs text-gray-500">
               Snapshot {formatDate(p.snapshotDate)} · valued at prices as of{' '}
               {formatDate(p.priceAsOf!)}
             </p>
@@ -124,19 +125,23 @@ export function PositionsPage() {
               <Tr key={`${x.accountId}-${x.instrumentId}`}>
                 <Td>
                   <p className="font-medium">{x.instrumentName}</p>
-                  <p className="font-mono text-[11px] text-muted">{x.symbol}</p>
+                  <p className="font-mono text-[11px] text-gray-500">{x.symbol}</p>
                 </Td>
                 <Td>
                   <span
-                    className="mr-1.5 inline-block size-2 rounded-sm"
-                    style={{ background: ASSET_COLORS[x.assetClass] }}
+                    className={cn(
+                      'mr-1.5 inline-block size-2 rounded-full',
+                      assetClassColor(x.assetClass).dot,
+                    )}
                     aria-hidden
                   />
                   {humanize(x.assetClass)}
                 </Td>
-                <Td className="hidden font-mono text-xs text-muted lg:table-cell">{x.accountId}</Td>
+                <Td className="hidden font-mono text-xs text-gray-500 lg:table-cell">
+                  {x.accountId}
+                </Td>
                 <Td numeric>{formatQuantity(x.quantity)}</Td>
-                <Td numeric className="text-muted">
+                <Td numeric className="text-gray-500">
                   {formatMoney(x.avgCost)}
                 </Td>
                 <Td numeric>{formatMoney(x.lastPrice)}</Td>
@@ -145,7 +150,7 @@ export function PositionsPage() {
                 </Td>
                 <Td numeric>
                   <Pnl value={x.unrealisedPnl} />
-                  <span className="block text-[11px] text-muted">
+                  <span className="block text-[11px] text-gray-500">
                     {formatPct(pnlPct(x), { signed: true })}
                   </span>
                 </Td>
@@ -155,11 +160,8 @@ export function PositionsPage() {
         </tbody>
         {totals && rows.length > 0 && (
           <tfoot>
-            <tr className="bg-paper/60 font-medium">
-              <Td
-                colSpan={6}
-                className="text-right text-[11px] tracking-[0.08em] text-muted uppercase"
-              >
+            <tr className="bg-gray-alpha-50 font-medium">
+              <Td colSpan={6} className="text-right text-13 text-gray-500">
                 {account ? `Total · ${account.accountId}` : 'Total · all accounts'}
               </Td>
               <Td numeric>{formatMoney(totals.marketValue)}</Td>

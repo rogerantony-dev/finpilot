@@ -35,42 +35,65 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-dvh place-items-center px-4 py-12">
-      <div className="w-full max-w-sm animate-rise">
-        <p className="mb-8 text-center font-display text-3xl tracking-tight text-ink">
-          Fin<span className="italic text-accent">Pilot</span>
-        </p>
-        <div className="rounded-xl border border-line bg-surface p-7 shadow-[0_24px_48px_-24px_rgb(27_26_23/0.25)]">
-          <h1 className="font-display text-2xl text-ink">Sign in</h1>
-          <p className="mt-1 mb-6 text-sm text-muted">Wealth service desk · internal use</p>
-
-          <Form errors={errors} onSubmit={handleSubmit} noValidate>
-            <Field.Root name="email">
-              <Field.Label>Email</Field.Label>
-              <Field.Control type="email" autoComplete="username" aria-required autoFocus />
-              <Field.Error />
-            </Field.Root>
-            <Field.Root name="password">
-              <Field.Label>Password</Field.Label>
-              <Field.Control type="password" autoComplete="current-password" aria-required />
-              <Field.Error />
-            </Field.Root>
-
-            {formError && (
-              <p
-                role="alert"
-                className="rounded-md border border-loss/25 bg-loss-soft px-3 py-2 text-sm text-loss"
-              >
-                {formError}
-              </p>
-            )}
-
-            <Button type="submit" disabled={login.isPending} className="mt-1 w-full">
-              {login.isPending ? 'Signing in…' : 'Sign in'}
-            </Button>
-          </Form>
+    <main className="grid min-h-dvh place-items-center bg-gray-0 px-4 py-12">
+      <div className="w-full max-w-[300px]">
+        <div className="mb-6 flex flex-col items-center gap-3 text-center">
+          <span
+            aria-hidden
+            className="flex size-9 items-center justify-center rounded-xl bg-gray-950 text-sm font-semibold text-gray-0 shadow-custom-2"
+          >
+            F
+          </span>
+          <div>
+            <h1 className="text-lg font-semibold tracking-[-0.01em] text-gray-900">
+              Sign in to FinPilot
+            </h1>
+            <p className="mt-1 text-13 tracking-[0.01em] text-gray-500">
+              Wealth service desk · internal use
+            </p>
+          </div>
         </div>
-        <p className="mt-6 text-center text-xs text-muted">
+
+        <Form errors={errors} onSubmit={handleSubmit} noValidate className="gap-3">
+          <Field.Root name="email">
+            <Field.Label className="sr-only">Email</Field.Label>
+            <Field.Control
+              type="email"
+              autoComplete="username"
+              aria-required
+              autoFocus
+              placeholder="Email"
+              className="h-10"
+            />
+            <Field.Error />
+          </Field.Root>
+          <Field.Root name="password">
+            <Field.Label className="sr-only">Password</Field.Label>
+            <Field.Control
+              type="password"
+              autoComplete="current-password"
+              aria-required
+              placeholder="Password"
+              className="h-10"
+            />
+            <Field.Error />
+          </Field.Root>
+
+          {formError && (
+            <p role="alert" className="rounded-lg bg-red-100 px-3 py-2 text-13 text-red-700">
+              {formError}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            disabled={login.isPending}
+            className="mt-1 h-10 w-full rounded-[12px] text-sm"
+          >
+            {login.isPending ? 'Signing in…' : 'Continue'}
+          </Button>
+        </Form>
+        <p className="mt-6 text-center text-xs text-gray-400">
           Synthetic data only. Demo credentials are in the README.
         </p>
       </div>
