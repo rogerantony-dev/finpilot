@@ -5,8 +5,8 @@
 Investment portfolio and goal monitoring platform for an internal wealth-service
 team. Built for the FinPilot full-stack assessment using **synthetic data only**.
 
-> Status: database, seed, REST API, CI and web app done (Phases 1–5). The
-> admin import screen lands next — see [DECISIONS.md](DECISIONS.md).
+> Status: database, seed, REST API, CI, web app and admin CSV import done
+> (Phases 1–6). Next: one-command Docker Compose and the architecture report — see [DECISIONS.md](DECISIONS.md).
 
 ## Stack
 
@@ -131,6 +131,17 @@ in foreign-key order through the same validation pipeline as the admin upload,
 and prints accepted/rejected counts plus the reason for every rejected row.
 Expected: transactions 4,550 accepted / 4 rejected; holdings 982 / 3; all
 other files fully accepted.
+
+- Demo files for the import screen, with expected results:
+  [data/samples/README.md](data/samples/README.md)
+
+```bash
+# Import from the command line (as admin)
+curl -c jar -X POST localhost:3000/api/v1/auth/login -H 'content-type: application/json' \
+  -d '{"email":"admin@finpilot.test","password":"admin-demo-2026"}'
+curl -b jar -X POST 'localhost:3000/api/v1/admin/imports/transactions?fileName=transactions_with_errors.csv' \
+  -H 'content-type: text/csv' --data-binary @data/samples/transactions_with_errors.csv
+```
 
 - Data-quality issues and handling: [docs/data-audit.md](docs/data-audit.md)
 - SQL tasks and `EXPLAIN` walkthrough: [docs/sql-tasks.md](docs/sql-tasks.md)

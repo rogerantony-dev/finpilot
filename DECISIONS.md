@@ -345,3 +345,38 @@ constraints, views and partial indexes are and how FinPilot uses them.
   loads only on the overview; the initial bundle is ~107 kB gzipped.
 - **Dates** are formatted from the `YYYY-MM-DD` string directly (no `Date`
   objects): no time-zone shift and identical output in every browser.
+
+---
+
+## D11. Admin CSV import
+
+- **Endpoint:** `POST /api/v1/admin/imports/transactions` with the file as the
+  request body (`Content-Type: text/csv`, `?fileName=` for the record), not
+  `multipart/form-data`. One file per request needs no multipart parser, the
+  body limit (5 MB) applies directly, and it is easy to call from curl, Swagger
+  and `fetch`.
+- **Same pipeline as the seed** (D6): per-row validation, staging table,
+  set-based reference checks, merge in one transaction, rejects stored with
+  reasons and the original row, per-dataset advisory lock.
+- **Status codes:** `201` new batch; `200` with `status: ALREADY_IMPORTED`
+  when this exact file (SHA-256) was imported before (idempotent, nothing
+  changes); `422` when the file as a whole is unusable (wrong header, not CSV);
+  `400` for an empty body or wrong content type; `403` for non-admins.
+- **Partial success by design:** valid rows are imported and invalid rows are
+  quarantined, rather than rejecting the whole file for one bad row. Operations
+  can fix and re-send only the rejected rows (the UI downloads them as CSV with
+  the reasons). A file-level all-or-nothing mode would be a flag on the same
+  pipeline.
+- **Response size:** up to 200 rejected rows inline (`rejectsTruncated`
+  flags more); the full list is paginated at
+  `GET /admin/imports/{batchId}/rejects`. `GET /admin/imports` is the batch
+  history with who uploaded it.
+- **Audit:** every batch records file name, SHA-256, counts, uploader and
+  timestamps; every import logs one structured line (`import completed`) with
+  the batch ID, counts and user ID.
+- **Authorisation:** all `/admin/*` routes sit behind
+  `app.requireRole('ADMIN')`; the web route is wrapped in
+  `<RequireAuth role="ADMIN">` and the menu item is hidden for viewers. The UI
+  check is convenience only; the API enforces it.
+- **Empty enum cells** are reported as `REQUIRED` (not `INVALID_ENUM`), so the
+  reason tells the data provider what to fix.
