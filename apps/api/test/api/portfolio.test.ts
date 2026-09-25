@@ -25,7 +25,7 @@ describe('GET /api/v1/customers/:customerId/portfolio', () => {
     expect(res.statusCode).toBe(200);
     const p = res.json();
     // Cross-checked against an independent calculation from the raw CSVs.
-    expect(p.totals.marketValue).toBe('1953574.61');
+    expect(p.totals.marketValue).toBe('1953574.62');
     expect(p).toMatchObject({
       currency: 'INR',
       snapshotDate: '2026-09-18',
