@@ -1,2 +1,3 @@
 # Keep supplied CSVs byte-for-byte (they use CRLF); never normalise them.
 data/raw/*.csv -text
+data/samples/*.csv -text
