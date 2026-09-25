@@ -99,7 +99,12 @@ pnpm dev            # API :3000, web :5173 (proxies /api to the API)
 pnpm lint | typecheck | test | build | format
 ```
 
-Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done.
+Run `pnpm format:check && pnpm lint && pnpm typecheck && pnpm test` before
+declaring work done; CI (`.github/workflows/ci.yml`) runs the same checks plus a
+migration rollback check and `kysely-codegen --verify`, so run `pnpm db:codegen`
+after any migration.
+
+Remote: https://github.com/rogerantony-dev/finpilot (private), branch `main`.
 
 ## Conventions
 

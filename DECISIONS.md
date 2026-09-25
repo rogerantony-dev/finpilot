@@ -274,3 +274,29 @@ constraints, views and partial indexes are and how FinPilot uses them.
   `SEED_VIEWER_PASSWORD` / `SEED_ADMIN_PASSWORD`; no credentials are in code.
 - **Logs** redact `Cookie`, `Authorization` and `Set-Cookie`; login attempts,
   forbidden access and goal changes are logged with the user ID.
+
+---
+
+## D9. CI/CD
+
+- **GitHub Actions** (`.github/workflows/ci.yml`) on every push to `main` and
+  every pull request; a newer push cancels an in-progress run for the same ref.
+- **Steps, each failing the pipeline on error:** install with a frozen
+  lockfile → Prettier check → ESLint → TypeScript → `pnpm audit` (fails on
+  high/critical advisories) → migrations apply, **roll back to an empty
+  schema**, and re-apply → generated Kysely types match the migrated schema →
+  tests against a real PostgreSQL 17 service container → production build.
+- **Tests use a real database**, not mocks: the service container mirrors the
+  local Docker setup, and the test run recreates its database from the
+  migrations, so CI proves a clean install works.
+- **Least privilege:** the workflow token is `contents: read`; the database
+  password is a throwaway value for the ephemeral container, not a secret.
+- **Dependabot** opens weekly update PRs for npm packages (minor/patch grouped)
+  and GitHub Actions; each PR runs the same pipeline.
+- **Deployment:** the brief requires local hosting only. "Deploy" is the
+  documented local start (Docker Compose, Phase 7). The production path would
+  add a job on `main` that builds and pushes versioned images, runs
+  migrations as a separate one-off step, then rolls out; see the architecture
+  report.
+- **Not used:** CodeQL (SAST) requires GitHub Advanced Security on private
+  repositories; the dependency audit and Dependabot cover supply-chain risk.

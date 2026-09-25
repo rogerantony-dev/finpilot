@@ -1,5 +1,7 @@
 # FinPilot
 
+[![CI](https://github.com/rogerantony-dev/finpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/rogerantony-dev/finpilot/actions/workflows/ci.yml)
+
 Investment portfolio and goal monitoring platform for an internal wealth-service
 team. Built for the FinPilot full-stack assessment using **synthetic data only**.
 
@@ -118,6 +120,14 @@ other files fully accepted.
 
 - Data-quality issues and handling: [docs/data-audit.md](docs/data-audit.md)
 - SQL tasks and `EXPLAIN` walkthrough: [docs/sql-tasks.md](docs/sql-tasks.md)
+
+## CI
+
+GitHub Actions runs on every push to `main` and every pull request
+([runs](https://github.com/rogerantony-dev/finpilot/actions)): format check →
+lint → typecheck → dependency audit → migrations apply / roll back / re-apply
+→ generated DB types up to date → tests against PostgreSQL 17 → build. Any
+failing step fails the run. Details: `DECISIONS.md` D9.
 
 ## Tests
 
