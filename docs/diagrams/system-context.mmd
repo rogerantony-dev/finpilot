@@ -1,0 +1,23 @@
+flowchart LR
+  viewer["Wealth / service user<br/>(VIEWER)"]
+  admin["Operations administrator<br/>(ADMIN)"]
+  reviewer["Engineering reviewer"]
+  csv[("Daily CSV files<br/>(synthetic)")]
+
+  subgraph host["Local host · Docker Compose"]
+    direction LR
+    web["web<br/>nginx: SPA + reverse proxy"]
+    api["api<br/>Fastify REST /api/v1"]
+    db[("PostgreSQL 17")]
+  end
+
+  gh["GitHub<br/>repo + Actions CI"]
+
+  viewer -- "HTTPS/HTTP · browser" --> web
+  admin -- "upload CSV" --> web
+  csv -. "file" .-> admin
+  web -- "/api/*" --> api
+  api -- "SQL (Kysely, pooled)" --> db
+  reviewer -- "Swagger /api/docs" --> web
+  reviewer -- "code, PRs, CI runs" --> gh
+  gh -. "lint · test · build ·<br/>docker smoke test" .-> host

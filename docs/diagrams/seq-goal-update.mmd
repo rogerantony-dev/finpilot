@@ -1,0 +1,32 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant W as SPA (GoalDialog)
+  participant A as API PATCH /goals/:goalId
+  participant S as goals.service
+  participant D as PostgreSQL
+
+  U->>W: edit fields, Save changes
+  W->>W: validate with shared goalCreate schema
+  alt client validation fails
+    W->>U: field errors (no request)
+  else
+    W->>W: diff against current goal: send changed fields only
+    W->>A: PATCH {currentFundedAmount: "300000"}
+    A->>A: auth · Zod body (goalUpdate) → 400 with field details if invalid
+    A->>S: editGoal(goalId, changes)
+    S->>D: SELECT FROM v_goal_status WHERE goal_id = $1
+    alt not found
+      S-->>A: 404 NOT_FOUND
+    else target date changed to the past
+      S-->>A: 422 UNPROCESSABLE, details[targetDate]
+    else
+      S->>D: UPDATE goals SET … , updated_at = now() (parameterised)
+      Note right of D: CHECK target > 0, funded >= 0<br/>as last line of defence
+      S->>D: SELECT FROM v_goal_status (funded %, flags)
+      S-->>A: updated goal
+      A->>A: log "goal updated" {goalId, userId, fields, reqId}
+      A-->>W: 200 Goal
+      W->>W: invalidate goals query → list refreshes, toast
+    end
+  end

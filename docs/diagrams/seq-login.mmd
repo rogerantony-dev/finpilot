@@ -1,0 +1,24 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant W as SPA (LoginPage)
+  participant N as nginx
+  participant A as API /auth/login
+  participant D as PostgreSQL
+
+  U->>W: email + password, submit
+  W->>W: validate with shared Zod schema (loginRequest)
+  W->>N: POST /api/v1/auth/login (JSON)
+  N->>A: proxy + X-Request-Id
+  A->>A: rate limit (10/min per client IP)
+  A->>D: SELECT user WHERE lower(email) = $1
+  D-->>A: user row (or none)
+  A->>A: scrypt verify, constant time<br/>(dummy hash if user unknown)
+  alt credentials valid
+    A-->>W: 200 {user} + Set-Cookie finpilot_session<br/>(JWT, httpOnly, SameSite=Strict, Path=/api, 8 h)
+    W->>W: cache session, navigate to ?next (same-app paths only)
+  else invalid
+    A-->>W: 401 UNAUTHENTICATED "Invalid email or password"
+    W->>U: show message
+  end
+  Note over W,A: Every later request carries the cookie, and any 401 clears the cached session and returns to login.

@@ -1,0 +1,81 @@
+erDiagram
+  customers ||--o{ accounts : "owns"
+  customers ||--o{ risk_profiles : "assessed (latest via view)"
+  customers ||--o{ goals : "saves for"
+  accounts ||--o{ holdings : "snapshot positions"
+  accounts ||--o{ transactions : "ledger"
+  instruments ||--o{ holdings : "priced by"
+  instruments ||--o{ transactions : "traded"
+  users |o--o{ import_batches : "uploaded (null = seed)"
+  import_batches ||--o{ import_rejects : "rejected rows"
+
+  customers {
+    text customer_id PK "C0001"
+    text email UK "lower(email) unique"
+    date date_of_birth "CHECK < onboarded_at"
+    text kyc_status "VERIFIED / PENDING / REVIEW"
+    text segment "Mass / Affluent / HNI"
+  }
+  accounts {
+    text account_id PK "A00001"
+    text customer_id FK "indexed"
+    text account_type "BROKERAGE / MUTUAL_FUND / RETIREMENT"
+    text status "ACTIVE / DORMANT / CLOSED"
+  }
+  instruments {
+    text instrument_id PK "I0001"
+    text symbol UK
+    text asset_class "EQUITY / ETF / MUTUAL_FUND / BOND / REIT / GSEC"
+    numeric last_price "CHECK > 0"
+    date price_as_of
+  }
+  holdings {
+    text account_id PK,FK
+    text instrument_id PK,FK "indexed"
+    date snapshot_date PK
+    numeric quantity "CHECK > 0"
+    numeric avg_cost "CHECK >= 0"
+  }
+  transactions {
+    text transaction_id PK "T0000001"
+    text account_id FK "idx (account_id, trade_date DESC, id DESC)"
+    text instrument_id FK "indexed"
+    text transaction_type "BUY / SELL / DIVIDEND / FEE"
+    date trade_date
+    numeric amount "CHECK > 0"
+    text status "SETTLED / PENDING / REVERSED; partial idx <> SETTLED"
+  }
+  risk_profiles {
+    text customer_id PK,FK
+    date assessed_at PK
+    smallint risk_score "CHECK 0..100"
+    text risk_level
+  }
+  goals {
+    text goal_id PK "G00001, sequence"
+    text customer_id FK "indexed"
+    numeric target_amount "CHECK > 0"
+    numeric current_funded_amount "CHECK >= 0"
+    date target_date
+    text priority "LOW / MEDIUM / HIGH"
+  }
+  users {
+    bigint user_id PK
+    text email UK
+    text password_hash "scrypt"
+    text role "VIEWER / ADMIN"
+  }
+  import_batches {
+    bigint batch_id PK
+    text dataset
+    text file_sha256 "UNIQUE (dataset, sha256)"
+    int accepted_rows "CHECK accepted + rejected = total"
+    bigint uploaded_by FK
+  }
+  import_rejects {
+    bigint batch_id PK,FK
+    int line_number PK
+    text reason_code "indexed"
+    jsonb reasons
+    jsonb raw_row
+  }

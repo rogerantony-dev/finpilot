@@ -16,3 +16,6 @@ coverage/
 
 # Logs
 *.log
+
+# Report generator dependencies and scratch output
+docs/report/node_modules/

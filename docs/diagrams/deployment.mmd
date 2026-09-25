@@ -1,0 +1,22 @@
+flowchart LR
+  browser["Browser"]
+
+  subgraph compose["Docker Compose · network finpilot_default"]
+    direction LR
+    web["web · nginx-unprivileged<br/>:8080 → host 127.0.0.1:8088<br/>SPA + security headers<br/>/api/* proxy, X-Request-Id"]
+    api["api · node:24-alpine (non-root)<br/>:3000 (not published)<br/>healthcheck GET /api/v1/health"]
+    migrate["migrate · one-off job<br/>dbmate up → seed → exit 0"]
+    db[("db · postgres:17-alpine<br/>:5432 → host 127.0.0.1:5433<br/>volume pgdata")]
+  end
+
+  env[".env (git-ignored)<br/>JWT_SECRET, DB credentials,<br/>demo passwords"]
+
+  browser -- "http://localhost:8088" --> web
+  web -- "http://api:3000" --> api
+  api --> db
+  migrate --> db
+  env -. "compose variables" .-> compose
+
+  db -. "1 · healthy" .-> migrate
+  migrate -. "2 · completed successfully" .-> api
+  api -. "3 · healthy" .-> web

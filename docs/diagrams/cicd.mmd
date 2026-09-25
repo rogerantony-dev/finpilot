@@ -1,0 +1,23 @@
+flowchart LR
+  dev["Developer push /<br/>pull request"] --> gha
+
+  subgraph gha["GitHub Actions · CI workflow"]
+    direction LR
+    subgraph job1["job: build-and-test (Postgres 17 service)"]
+      direction TB
+      i["pnpm install --frozen-lockfile"] --> f["Prettier check"] --> l["ESLint"] --> t["TypeScript"]
+      t --> au["pnpm audit (high/critical)"] --> m["migrations: up → roll back all → up"]
+      m --> cg["kysely-codegen --verify"] --> tests["Vitest: API + web<br/>(real database)"] --> b["build"]
+    end
+    subgraph job2["job: docker-stack"]
+      direction TB
+      e[".env from example<br/>(random JWT secret)"] --> up["docker compose up --build --wait"]
+      up --> smoke["scripts/smoke-test.sh<br/>through nginx"] --> idem["restart: migrate + seed<br/>= ALREADY_IMPORTED"] --> down["compose down -v"]
+    end
+    job1 --> job2
+  end
+
+  gha -- "any step fails" --> red["run fails · PR blocked"]
+  gha -- "all green" --> green["merge to main"]
+  green -. "production path (documented):<br/>push images → staging → approve → prod" .-> prod["registry / deploy"]
+  dep["Dependabot weekly PRs"] --> gha

@@ -1,0 +1,32 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant W as SPA (OverviewPage)
+  participant Q as TanStack Query cache
+  participant A as API
+  participant D as PostgreSQL
+
+  U->>W: open /customers/C0026
+  W->>Q: usePortfolio("C0026")
+  alt cached and fresh (< 30 s)
+    Q-->>W: cached portfolio
+  else
+    Q->>A: GET /api/v1/customers/C0026/portfolio (cookie)
+    A->>A: verify JWT (onRequest) · validate params (Zod)
+    A->>D: SELECT 1 FROM customers WHERE customer_id = $1
+    alt unknown customer
+      A-->>Q: 404 NOT_FOUND
+    else
+      par 4 independent queries, no N+1
+        A->>D: v_customer_portfolio (totals, dates)
+        A->>D: v_account_valuation (per account)
+        A->>D: v_asset_allocation (per class, weight %)
+        A->>D: v_positions (market value, P/L)
+      end
+      D-->>A: rows (NUMERIC as strings)
+      A->>A: map snake_case → DTO, serialise against response schema
+      A-->>Q: 200 Portfolio JSON
+    end
+    Q-->>W: data
+  end
+  W->>U: value, P/L, freshness dates, donut + table, accounts

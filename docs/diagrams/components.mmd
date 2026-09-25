@@ -1,0 +1,37 @@
+flowchart LR
+  subgraph web["apps/web · React 19 SPA"]
+    direction TB
+    router["app/router · lazy routes<br/>RequireAuth (role guard)"]
+    features["features/<br/>auth · customers · customer ·<br/>goals · admin"]
+    query["TanStack Query hooks<br/>(features/*/api.ts)"]
+    ui["components/ui wrappers<br/>(only place importing Base UI)"]
+    libweb["lib: api client · format ·<br/>useUrlState · form errors"]
+    router --> features --> query --> libweb
+    features --> ui
+  end
+
+  shared["packages/shared<br/>Zod contracts + types"]
+
+  subgraph api["apps/api · Fastify"]
+    direction TB
+    plugins["plugins: error model · auth (JWT cookie,<br/>requireRole) · rate limit · Swagger"]
+    routes["modules/*/routes<br/>HTTP, schemas, status codes"]
+    services["services<br/>business rules (goals)"]
+    repos["repositories<br/>Kysely queries → DTOs"]
+    pipeline["imports/ pipeline<br/>parse → validate → stage → merge"]
+    plugins --> routes --> services --> repos
+    routes --> repos
+    routes --> pipeline
+  end
+
+  subgraph pg["PostgreSQL"]
+    tables["tables + constraints"]
+    views["views: v_positions · v_account_valuation ·<br/>v_customer_portfolio · v_asset_allocation ·<br/>v_goal_status · v_monthly_net_flows ·<br/>v_data_quality_exceptions"]
+  end
+
+  libweb -- "fetch /api/v1 (same origin)" --> plugins
+  shared -. "types" .-> query
+  shared -. "validation + OpenAPI" .-> routes
+  repos --> views
+  repos --> tables
+  pipeline --> tables

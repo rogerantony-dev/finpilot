@@ -1,0 +1,33 @@
+sequenceDiagram
+  autonumber
+  actor Ad as Admin
+  participant W as SPA (ImportPage)
+  participant A as API /admin/imports/transactions
+  participant P as import pipeline
+  participant D as PostgreSQL
+
+  Ad->>W: choose CSV
+  W->>W: check .csv, size ≤ 5 MB, count rows
+  W->>A: POST text/csv ?fileName=… (cookie)
+  A->>A: auth · requireRole(ADMIN) → 403 otherwise
+  A->>P: importCsv(dataset, content, user)
+  P->>P: SHA-256 of file · parse CSV · check header (→ 422 if wrong)
+  P->>D: BEGIN · pg_advisory_xact_lock('import:transactions')
+  P->>D: batch with same (dataset, sha256)?
+  alt already imported
+    D-->>P: previous batch
+    P-->>A: ALREADY_IMPORTED (nothing written)
+    A-->>W: 200 + original counts
+  else new file
+    P->>P: validate each row (types, enums, dates, amount rules, future date)
+    P->>P: in-file duplicates: exact → DUPLICATE_ROW, different → CONFLICTING_DUPLICATE
+    P->>D: CREATE TEMP TABLE import_staging … ON COMMIT DROP · INSERT valid rows
+    P->>D: set-based checks: unknown account/instrument, key already in ledger
+    P->>D: DELETE rejected from staging · INSERT INTO transactions SELECT … FROM staging
+    P->>D: INSERT import_batches (counts) · INSERT import_rejects (reasons, raw row)
+    P->>D: COMMIT (all or nothing)
+    P-->>A: IMPORTED, counts, rejects
+    A->>A: log "import completed" {batchId, counts, userId}
+    A-->>W: 201 + counts + first 200 rejects
+  end
+  W->>Ad: accepted / rejected, reason per row, CSV download, history
