@@ -67,3 +67,21 @@ export function humanize(value: string): string {
 
 /** Sign of a decimal string: 1, -1 or 0. */
 export const signOf = (value: string | number) => Math.sign(Number(value));
+
+const dateTimeFmt = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+/** ISO timestamp → '25 Sep, 15:21' in the viewer's time zone (for audit/history lists). */
+export const formatDateTime = (iso: string) =>
+  dateTimeFmt.format(new Date(iso)).replace('Sept', 'Sep');
+
+/** 1536 → '1.5 KB'. */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}

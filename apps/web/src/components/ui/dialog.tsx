@@ -1,6 +1,7 @@
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
 import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 
 export interface DialogProps {
   open: boolean;
@@ -8,15 +9,29 @@ export interface DialogProps {
   title: string;
   description?: ReactNode;
   children: ReactNode;
+  /** 'lg' for dialogs that hold tables. */
+  size?: 'md' | 'lg';
 }
 
 /** Modal dialog: focus is trapped inside and returned on close; Esc closes it. */
-export function Dialog({ open, onOpenChange, title, description, children }: DialogProps) {
+export function Dialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  size = 'md',
+}: DialogProps) {
   return (
     <BaseDialog.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
       <BaseDialog.Portal>
         <BaseDialog.Backdrop className="fixed inset-0 z-40 bg-ink/30 backdrop-blur-[2px] transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0" />
-        <BaseDialog.Popup className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[36rem] max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-line bg-surface p-6 shadow-2xl shadow-ink/20 transition-[scale,opacity] duration-150 data-ending-style:scale-[0.97] data-ending-style:opacity-0 data-starting-style:scale-[0.97] data-starting-style:opacity-0">
+        <BaseDialog.Popup
+          className={cn(
+            size === 'lg' ? 'w-[60rem]' : 'w-[36rem]',
+            'fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-line bg-surface p-6 shadow-2xl shadow-ink/20 transition-[scale,opacity] duration-150 data-ending-style:scale-[0.97] data-ending-style:opacity-0 data-starting-style:scale-[0.97] data-starting-style:opacity-0',
+          )}
+        >
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <BaseDialog.Title className="font-display text-2xl text-ink">

@@ -67,3 +67,12 @@
     transition-duration: 1ms !important;
   }
 }
+
+@keyframes indeterminate {
+  from {
+    left: -35%;
+  }
+  to {
+    left: 100%;
+  }
+}

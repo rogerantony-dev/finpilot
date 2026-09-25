@@ -32,15 +32,32 @@ export function toSearch(query: Query = {}): string {
  */
 export async function api<T>(
   path: string,
-  options: { method?: string; query?: Query; body?: unknown; signal?: AbortSignal } = {},
+  options: {
+    method?: string;
+    query?: Query;
+    /** JSON body. */
+    body?: unknown;
+    /** Raw body sent as-is (e.g. a CSV file) with its content type. */
+    raw?: { body: BodyInit; contentType: string };
+    signal?: AbortSignal;
+  } = {},
 ): Promise<T> {
+  const headers = options.raw
+    ? { 'content-type': options.raw.contentType }
+    : options.body !== undefined
+      ? { 'content-type': 'application/json' }
+      : undefined;
   let res: Response;
   try {
     res = await fetch(`/api/v1${path}${toSearch(options.query)}`, {
       method: options.method ?? 'GET',
       credentials: 'same-origin',
-      headers: options.body === undefined ? undefined : { 'content-type': 'application/json' },
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      headers,
+      body: options.raw
+        ? options.raw.body
+        : options.body === undefined
+          ? undefined
+          : JSON.stringify(options.body),
       signal: options.signal,
     });
   } catch (err) {

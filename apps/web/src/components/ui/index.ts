@@ -8,6 +8,7 @@ export { Field } from './field';
 export { Form, type FormErrors } from './form';
 export { Meter } from './meter';
 export { Pagination } from './pagination';
+export { Progress } from './progress';
 export { Select, type SelectOption } from './select';
 export { Skeleton, SkeletonRows } from './skeleton';
 export { EmptyState, ErrorState } from './states';

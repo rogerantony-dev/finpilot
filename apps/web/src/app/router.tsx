@@ -50,6 +50,18 @@ export const router = createBrowserRouter([
               },
             ],
           },
+          {
+            // Administrators only; everyone else is sent back to the customer list.
+            element: <RequireAuth role="ADMIN" />,
+            children: [
+              {
+                path: 'admin/import',
+                lazy: async () => ({
+                  Component: (await import('../features/admin/ImportPage')).ImportPage,
+                }),
+              },
+            ],
+          },
           { path: '*', element: <NotFoundPage /> },
         ],
       },
