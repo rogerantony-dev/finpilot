@@ -87,3 +87,37 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  # Deployment check: build the production images and bring up the full stack
+  # exactly as `docker compose up` does locally, then smoke-test it end to end.
+  docker-stack:
+    name: Docker stack smoke test
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Create .env from the example (random JWT secret)
+        run: |
+          cp .env.example .env
+          sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$(openssl rand -hex 32)/" .env
+
+      - name: Build images and start the stack
+        run: docker compose up --build -d --wait
+
+      - name: Smoke test through the web server
+        run: scripts/smoke-test.sh http://localhost:8088
+
+      - name: Migrations and seed are idempotent on restart
+        run: |
+          docker compose up -d --wait
+          docker compose logs migrate --no-log-prefix | grep -c ALREADY_IMPORTED | grep -qx 7
+
+      - name: Container logs
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v
