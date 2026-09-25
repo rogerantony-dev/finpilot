@@ -18,6 +18,7 @@ const amount = (label: string, { allowZero }: { allowZero: boolean }) =>
   z
     .string()
     .trim()
+    .min(1, { error: `${label} is required` })
     .regex(/^\d+(\.\d{1,2})?$/, { error: `${label} must be a number with up to 2 decimals` })
     .refine((v) => (allowZero ? Number(v) >= 0 : Number(v) > 0), {
       error: allowZero ? `${label} cannot be negative` : `${label} must be greater than 0`,
@@ -34,7 +35,7 @@ const goalFields = {
     .max(100, { error: 'Goal name must be 100 characters or fewer' }),
   targetAmount: amount('Target amount', { allowZero: false }),
   currentFundedAmount: amount('Funded amount', { allowZero: true }),
-  targetDate: isoDate,
+  targetDate: z.string().min(1, { error: 'Target date is required' }).pipe(isoDate),
   priority: goalPriority,
 };
 

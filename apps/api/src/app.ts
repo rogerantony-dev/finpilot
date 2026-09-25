@@ -52,6 +52,8 @@ export async function buildApp(config: Config, db: Db, opts: FastifyServerOption
 
   app.addHook('onSend', async (req, reply) => {
     reply.header('x-request-id', req.id);
+    // Customer data must not be stored by browsers or intermediaries.
+    if (req.url.startsWith('/api/v1')) reply.header('cache-control', 'no-store');
   });
 
   await app.register(errorHandler);

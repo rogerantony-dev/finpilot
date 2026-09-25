@@ -91,10 +91,11 @@ describe('session', () => {
     expect(res.statusCode).toBe(401);
   });
 
-  it('returns the current user from /auth/me', async () => {
+  it('returns the current user from /auth/me, marked not cacheable', async () => {
     const cookie = await login(app, 'viewer');
     const res = await app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { cookie } });
     expect(res.statusCode).toBe(200);
+    expect(res.headers['cache-control']).toBe('no-store');
     expect(res.json().user).toMatchObject({ email: USERS.viewer.email, role: 'VIEWER' });
   });
 
