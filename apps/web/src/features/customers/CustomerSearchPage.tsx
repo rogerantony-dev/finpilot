@@ -1,6 +1,6 @@
 import { kycStatus, segment as segmentSchema } from '@finpilot/shared';
 import { Search } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import {
   ActiveFilters,
   Button,
@@ -56,6 +56,20 @@ export function CustomerSearchPage() {
     pageSize: PAGE_SIZE,
   });
   const cities = useCities();
+  const navigate = useNavigate();
+
+  /**
+   * The whole row opens the customer. The name stays a real link (keyboard,
+   * screen readers, cmd/ctrl-click); a row click that finishes a text
+   * selection is ignored so emails can still be copied.
+   */
+  function openRow(event: React.MouseEvent<HTMLTableRowElement>, customerId: string) {
+    if ((event.target as HTMLElement).closest('a, button')) return;
+    if (window.getSelection()?.toString()) return;
+    const path = `/customers/${customerId}`;
+    if (event.metaKey || event.ctrlKey) window.open(path, '_blank', 'noopener');
+    else navigate(path);
+  }
 
   // Each active filter becomes a removable pill; sort order is kept on clear.
   const labelOf = (options: { value: string; label: string }[], v: string) =>
@@ -114,7 +128,7 @@ export function CustomerSearchPage() {
             </form>
             <Select
               label="KYC status"
-              className="w-40"
+              className="w-44"
               options={kycOptions}
               value={values.kycStatus}
               onValueChange={(v) => update({ kycStatus: v })}
@@ -186,7 +200,11 @@ export function CustomerSearchPage() {
                   <SkeletonRows columns={6} />
                 ) : (
                   customers.data.data.map((c) => (
-                    <Tr key={c.customerId}>
+                    <Tr
+                      key={c.customerId}
+                      onClick={(e) => openRow(e, c.customerId)}
+                      className="cursor-pointer"
+                    >
                       <Td>
                         <Link
                           to={`/customers/${c.customerId}`}
