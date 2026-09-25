@@ -1,5 +1,6 @@
 // The only place feature code imports UI primitives from.
 // Base UI (@base-ui/react) is imported inside components/ui/ and nowhere else.
+export { ActiveFilters, type ActiveFilter } from './active-filters';
 export { Badge, type BadgeTone } from './badge';
 export { Button, type ButtonProps } from './button';
 export { Card, CardHeader } from './card';
