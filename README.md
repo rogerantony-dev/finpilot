@@ -5,7 +5,9 @@
 Investment portfolio and goal monitoring platform for an internal wealth-service
 team. Built for the FinPilot full-stack assessment using **synthetic data only**.
 
-> Synthetic data only. Architecture report: [docs/architecture-report.docx](docs/architecture-report.docx). — see [DECISIONS.md](DECISIONS.md).
+> Synthetic data only. Architecture report:
+> [PDF](docs/architecture-report.pdf) · [Word](docs/architecture-report.docx) ·
+> [diagram sources](docs/diagrams/README.md). — see [DECISIONS.md](DECISIONS.md).
 
 ## Stack
 
@@ -23,7 +25,7 @@ packages/
 db/
   migrations/   Plain SQL migrations (dbmate)
 data/raw/       Supplied synthetic CSVs, unmodified (SHA256SUMS included)
-docs/           Data audit, PostgreSQL primer, assignment brief
+docs/           Architecture report, diagrams, data audit, SQL tasks, primers
 ```
 
 ## Prerequisites

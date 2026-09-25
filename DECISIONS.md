@@ -427,3 +427,41 @@ migrate (one-off): dbmate up → seed → exit 0, before api starts
 | `.env`                | Secret manager (rotated `JWT_SECRET`, per-service least-privilege DB roles: migration role owns DDL, app role DML only)                                                         |
 | `docker compose logs` | Central log aggregation (JSON logs, searchable by `reqId`, `batchId`, `userId`), metrics and alerts on 5xx rate, latency, failed imports                                        |
 | GitHub Actions CI     | Same pipeline plus: push signed, versioned images to a registry; deploy to staging on `main`; promote to production on approval                                                 |
+
+---
+
+## Assumptions, deliberate omissions and known limitations
+
+**Assumptions**
+
+- All amounts are INR (the only currency in the data); no FX conversion.
+- The holdings snapshot is the source of truth for positions and the
+  instrument `last_price` for valuation; transactions are an activity ledger
+  and do not reconcile to holdings in the supplied data.
+- "Today" for future-date checks is the server's UTC date; goal target dates
+  are compared with it.
+- Transaction amounts are always positive; direction comes from the type.
+- A goal whose name mentions a different goal type is suspicious, not invalid.
+
+**Deliberate omissions**
+
+- Trading, payments, advice and real market data (out of scope by the brief).
+- Sign-up, password reset, MFA/SSO, refresh tokens and session revocation.
+- Admin UI imports transactions only (the pipeline supports every dataset).
+- Cloud deployment and TLS (documented production mapping instead, D12).
+- Editing or deleting imported ledger rows (never overwrite; corrections
+  would need an audited workflow).
+
+**Known limitations**
+
+- Offset pagination and `ILIKE` search suit thousands of rows, not millions
+  (next: keyset pagination, `pg_trgm`).
+- Valuations are computed by views on read; at scale a materialised daily
+  valuation would replace them.
+- Imports hold the file in memory (5 MB cap).
+- Stateless JWT: a role change or sign-out elsewhere takes effect at token
+  expiry (8 h); sign-out in the same browser is immediate.
+- Rate limiting is in-memory per API process; multiple replicas would need a
+  shared store (Redis).
+- Timestamps in the import history use the viewer's time zone; business dates
+  are plain calendar dates.
