@@ -18,6 +18,7 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { customerRoutes } from './modules/customers/customers.routes.js';
 import { goalRoutes } from './modules/goals/goals.routes.js';
 import { portfolioRoutes } from './modules/portfolio/portfolio.routes.js';
+import { importRoutes } from './modules/imports/imports.routes.js';
 import { healthRoutes } from './modules/system/health.routes.js';
 import { transactionRoutes } from './modules/transactions/transactions.routes.js';
 import { authPlugin } from './plugins/auth.js';
@@ -106,6 +107,7 @@ export async function buildApp(config: Config, db: Db, opts: FastifyServerOption
         await secured.register(portfolioRoutes);
         await secured.register(transactionRoutes);
         await secured.register(goalRoutes);
+        await secured.register(importRoutes);
       });
     },
     { prefix: '/api/v1' },

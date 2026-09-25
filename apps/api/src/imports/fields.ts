@@ -35,10 +35,12 @@ export const optionalText = () =>
     .optional()
     .transform((v) => (v ? v : null));
 
+/** An empty cell is REQUIRED; a filled cell with an unknown value is INVALID_ENUM. */
 export const enumField = <const T extends readonly [string, ...string[]]>(
   label: string,
   values: T,
-) => z.enum(values, { error: `${label} must be one of ${values.join(', ')}` });
+) =>
+  required(label).pipe(z.enum(values, { error: `${label} must be one of ${values.join(', ')}` }));
 
 export const dateField = (label: string) =>
   required(label)
