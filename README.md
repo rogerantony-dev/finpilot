@@ -5,8 +5,8 @@
 Investment portfolio and goal monitoring platform for an internal wealth-service
 team. Built for the FinPilot full-stack assessment using **synthetic data only**.
 
-> Status: database, seed and REST API done (Phases 1–3). UI screens and the
-> admin import screen land in later phases — see [DECISIONS.md](DECISIONS.md).
+> Status: database, seed, REST API, CI and web app done (Phases 1–5). The
+> admin import screen lands next — see [DECISIONS.md](DECISIONS.md).
 
 ## Stack
 
@@ -50,6 +50,20 @@ pnpm dev                          # API :3000 + web :5173
 | Health       | http://localhost:3000/api/v1/health |
 | Swagger UI   | http://localhost:3000/api/docs      |
 | OpenAPI JSON | http://localhost:3000/api/docs/json |
+
+## Using the app
+
+Open http://localhost:5173 and sign in with a demo user below.
+
+| Screen                  | What it shows                                                                                                                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Customers               | Search by name, ID, email or city; filter by KYC, segment, city; sortable, paginated on the server                                                                                 |
+| Customer → Overview     | Profile, KYC, segment, latest risk profile; portfolio value, gain/loss, cost basis, data freshness; asset-allocation chart with data table; account cards; goals needing attention |
+| Customer → Positions    | Quantity, average cost, last price, market value, unrealised P/L per position; filter by account; totals                                                                           |
+| Customer → Transactions | Date range, account, instrument, type and status filters; sort by date or amount; PENDING and REVERSED visually distinct                                                           |
+| Customer → Goals        | Funded %, overdue / under-funded / over-funded / name-type flags; create and edit with validation                                                                                  |
+
+Filters and pages are kept in the URL, so links can be shared.
 
 ## Demo users
 

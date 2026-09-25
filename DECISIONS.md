@@ -7,16 +7,16 @@ records what was decided, why, and what was rejected.
 
 ## D1. Stack: TypeScript end-to-end
 
-| Layer       | Choice                                                          |
-| ----------- | --------------------------------------------------------------- |
-| Frontend    | React + Vite, TanStack Query/Table, Recharts, Tailwind          |
-| API         | Fastify, Zod (request/response validation → OpenAPI), pino logs |
-| Data access | Kysely (typed SQL query builder)                                |
-| Migrations  | Plain `.sql` files (dbmate)                                     |
-| Database    | PostgreSQL 17 (Docker)                                          |
-| Tests       | Vitest                                                          |
-| CI          | GitHub Actions                                                  |
-| Auth        | JWT in an httpOnly cookie; roles `VIEWER` and `ADMIN`           |
+| Layer       | Choice                                                                  |
+| ----------- | ----------------------------------------------------------------------- |
+| Frontend    | React + Vite, TanStack Query, React Router, Recharts, Tailwind, Base UI |
+| API         | Fastify, Zod (request/response validation → OpenAPI), pino logs         |
+| Data access | Kysely (typed SQL query builder)                                        |
+| Migrations  | Plain `.sql` files (dbmate)                                             |
+| Database    | PostgreSQL 17 (Docker)                                                  |
+| Tests       | Vitest                                                                  |
+| CI          | GitHub Actions                                                          |
+| Auth        | JWT in an httpOnly cookie; roles `VIEWER` and `ADMIN`                   |
 
 **Why:** one language across API and UI, shared types, and fast iteration for a
 12–16 hour timebox. Alternatives considered: Next.js + separate API (two server
@@ -300,3 +300,48 @@ constraints, views and partial indexes are and how FinPilot uses them.
   report.
 - **Not used:** CodeQL (SAST) requires GitHub Advanced Security on private
   repositories; the dependency audit and Dependabot cover supply-chain risk.
+
+---
+
+## D10. Frontend
+
+- **Single-page app** (React 19 + Vite) served from the same origin as the API
+  (Vite proxies `/api` in development; a reverse proxy does the same in
+  production), so the session cookie works without CORS and JavaScript never
+  touches the token.
+- **Server state in TanStack Query**, never `useEffect` + `useState`: caching,
+  request cancellation, de-duplication and retries are handled in one place.
+  `useEffect` is not used anywhere in the app. Derived values are computed
+  during render; actions happen in event handlers.
+- **Filters, sort and page live in the URL** (`useUrlState`): refresh, back/forward
+  and shared links keep the exact view. Changing a filter resets to page 1.
+- **Server-side pagination and filtering** for customers and transactions;
+  `keepPreviousData` keeps the current page visible while the next loads (no
+  flicker, no layout jump). Positions (a few dozen rows per customer) are sorted
+  and filtered in the browser, but every valuation figure comes from the API.
+- **Forms** use Base UI `Form`/`Field` and the **same Zod schema as the API**
+  (`packages/shared`). All problems are reported at once, in our wording (no
+  native `required` popups); server field errors (400/422) appear under the
+  matching field. Edits send only changed fields (true PATCH).
+- **Session handling:** any 401 clears the cached session and `RequireAuth`
+  redirects to login, returning to the original page afterwards (only
+  same-app paths are accepted as `next`, avoiding open redirects). Sign-out
+  drops all cached customer data. A page restored from the browser's
+  back/forward cache is reloaded so it cannot show data after sign-out, and the
+  API marks responses `Cache-Control: no-store`.
+- **No TanStack Table:** tables are small, server-paginated and need only
+  sorting, so semantic `<table>` primitives (`components/ui/table.tsx`) with
+  `aria-sort` headers are simpler and fully accessible.
+- **Accessibility:** semantic landmarks and a skip link; every control has a
+  label; table captions; sortable headers expose `aria-sort`; gain/loss is
+  shown with +/− signs, not colour alone; the allocation chart is decorative
+  for screen readers and paired with a visible data table; meters announce
+  values (`aria-valuetext`); dialogs trap and restore focus; reduced-motion is
+  respected.
+- **Visual design:** a restrained "ledger" look (warm paper, ink, one deep-green
+  accent, serif display type with tabular figures) suited to an internal
+  finance tool. Fonts are self-hosted via Fontsource (no third-party requests).
+- **Code splitting:** customer pages are lazy routes, so the chart library
+  loads only on the overview; the initial bundle is ~107 kB gzipped.
+- **Dates** are formatted from the `YYYY-MM-DD` string directly (no `Date`
+  objects): no time-zone shift and identical output in every browser.

@@ -121,7 +121,19 @@ Remote: https://github.com/rogerantony-dev/finpilot (private), branch `main`.
   export it from `components/ui/index.ts`, then use it.
 - Style state with Base UI data attributes (`data-disabled`, `data-invalid`,
   `data-checked`, …) rather than extra props.
-- Server state via TanStack Query; no data fetching in `useEffect`.
+- Never call `useEffect`: server state via TanStack Query hooks in each
+  feature's `api.ts`; derive values during render; do work in event handlers;
+  reset components with `key`.
+- Features live in `apps/web/src/features/<area>/` (pages, `api.ts` hooks,
+  feature components). Shared layout in `components/layout/`.
+- Filter/sort/page state goes in the URL via `useUrlState` (`lib/use-url-state.ts`).
+- Forms: Base UI `Form` + `Field` with `errors` state; validate with the shared
+  Zod schema and `issuesToErrors`; map `ApiError.details` to the same errors.
+  Use `aria-required`, not `required` (Zod reports every problem at once).
+- Format money/dates/percentages only with `lib/format.ts` (decimal strings in,
+  Indian grouping out); never do valuation arithmetic in the browser.
+- Customer pages are lazy routes in `app/router.tsx`; keep heavy libraries
+  (charts) out of shared modules so they stay code-split.
 
 ### Backend
 
