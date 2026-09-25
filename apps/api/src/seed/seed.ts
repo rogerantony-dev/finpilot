@@ -10,8 +10,6 @@ import { LOAD_ORDER, type DatasetName } from '../imports/datasets.js';
 import { importCsv } from '../imports/import-service.js';
 import { seedUsers } from './users.js';
 
-const RAW_DIR = fileURLToPath(new URL('../../../../data/raw/', import.meta.url));
-
 const FILES: Record<DatasetName, string> = {
   customers: 'customers.csv',
   risk_profiles: 'risk_profiles.csv',
@@ -28,8 +26,15 @@ const seedEnv = z
   .object({
     SEED_VIEWER_PASSWORD: z.string().min(8),
     SEED_ADMIN_PASSWORD: z.string().min(8),
+    // The repo's data/raw by default; set explicitly inside containers.
+    SEED_DATA_DIR: z
+      .string()
+      .default(fileURLToPath(new URL('../../../../data/raw/', import.meta.url))),
   })
   .parse(process.env);
+const RAW_DIR = seedEnv.SEED_DATA_DIR.endsWith('/')
+  ? seedEnv.SEED_DATA_DIR
+  : `${seedEnv.SEED_DATA_DIR}/`;
 const db = createDb(config.DATABASE_URL);
 
 try {

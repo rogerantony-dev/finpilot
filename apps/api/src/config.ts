@@ -11,6 +11,8 @@ const envSchema = z.object({
   WEB_ORIGIN: z.url().default('http://localhost:5173'),
   // Set true when served over HTTPS so the session cookie is marked Secure.
   COOKIE_SECURE: z.stringbool().default(false),
+  // Set true behind a reverse proxy so req.ip (rate limiting, logs) is the client's IP.
+  TRUST_PROXY: z.stringbool().default(false),
 });
 
 export type Config = z.infer<typeof envSchema>;

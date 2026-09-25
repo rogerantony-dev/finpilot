@@ -12,6 +12,7 @@ const config: Config = {
   JWT_SECRET: 'x'.repeat(32),
   WEB_ORIGIN: 'http://localhost:5173',
   COOKIE_SECURE: false,
+  TRUST_PROXY: false,
 };
 
 describe('GET /api/v1/health', () => {

@@ -16,6 +16,7 @@ export const testConfig = (overrides: Partial<Config> = {}): Config => ({
   JWT_SECRET: 'test-secret-that-is-at-least-32-characters-long',
   WEB_ORIGIN: 'http://localhost:5173',
   COOKIE_SECURE: false,
+  TRUST_PROXY: false,
   ...overrides,
 });
 

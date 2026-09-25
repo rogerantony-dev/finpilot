@@ -42,6 +42,7 @@ export async function buildApp(config: Config, db: Db, opts: FastifyServerOption
     requestIdHeader: 'x-request-id',
     genReqId: () => randomUUID(),
     bodyLimit: 1024 * 1024,
+    trustProxy: config.TRUST_PROXY,
     ...opts,
   }).withTypeProvider<ZodTypeProvider>();
 
