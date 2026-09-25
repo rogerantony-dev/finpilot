@@ -33,6 +33,21 @@ docs/           Architecture report, diagrams, data audit, SQL tasks, primers
 - Node.js 24+ and pnpm 10 (`corepack enable`)
 - Docker (for PostgreSQL)
 
+## For reviewers
+
+| Deliverable                         | Where                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Repository                          | https://github.com/rogerantony-dev/finpilot (private: access by GitHub collaborator invite)                                                            |
+| Run locally                         | [Quick start](#quick-start-one-command): `docker compose up --build` → http://localhost:8088                                                           |
+| Demo users                          | [Demo users](#demo-users): `viewer@finpilot.test`, `admin@finpilot.test`                                                                               |
+| API docs                            | http://localhost:8088/api/docs (OpenAPI JSON at `/api/docs/json`)                                                                                      |
+| Architecture report                 | [PDF](docs/architecture-report.pdf) · [Word](docs/architecture-report.docx)                                                                            |
+| Decisions, assumptions, limitations | [DECISIONS.md](DECISIONS.md)                                                                                                                           |
+| Data anomalies and handling         | [docs/data-audit.md](docs/data-audit.md)                                                                                                               |
+| SQL tasks and `EXPLAIN`             | [docs/sql-tasks.md](docs/sql-tasks.md)                                                                                                                 |
+| CI runs                             | [Actions](https://github.com/rogerantony-dev/finpilot/actions); a failing test blocking a PR: [#1](https://github.com/rogerantony-dev/finpilot/pull/1) |
+| Import demo files                   | [data/samples](data/samples/README.md)                                                                                                                 |
+
 ## Quick start (one command)
 
 Requires Docker only.
