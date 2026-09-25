@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch cancels the run in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: finpilot
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: finpilot
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U finpilot"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      # Throwaway credentials for the CI service container only.
+      TEST_DATABASE_URL: postgres://finpilot:ci-only-password@localhost:5432/finpilot_test?sslmode=disable
+      MIGRATION_CHECK_URL: postgres://finpilot:ci-only-password@localhost:5432/finpilot_migrations?sslmode=disable
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Audit dependencies (fail on high/critical)
+        run: pnpm audit --audit-level=high
+
+      - name: Migrations apply and roll back cleanly
+        working-directory: apps/api
+        run: |
+          dbmate() { pnpm exec dbmate --url "$MIGRATION_CHECK_URL" --migrations-dir ../../db/migrations --no-dump-schema "$@"; }
+          dbmate create
+          dbmate up
+          migrations=$(ls ../../db/migrations/*.sql | wc -l)
+          for _ in $(seq "$migrations"); do dbmate rollback; done
+          tables=$(psql "$MIGRATION_CHECK_URL" -tAc "select count(*) from pg_tables where schemaname = 'public' and tablename <> 'schema_migrations'")
+          test "$tables" -eq 0 || { echo "::error::rollback left $tables tables behind"; exit 1; }
+          dbmate up
+
+      - name: Generated database types are up to date
+        working-directory: apps/api
+        run: >-
+          pnpm exec kysely-codegen --verify --url "$MIGRATION_CHECK_URL" --dialect postgres
+          --date-parser string --numeric-parser string --out-file src/db/schema.ts
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
