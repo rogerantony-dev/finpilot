@@ -1,5 +1,24 @@
 name: finpilot
 
+# Full stack:     docker compose up --build        → http://localhost:8088
+# Database only:  docker compose up -d db          (for `pnpm dev`)
+#
+# Start-up order: db (healthy) → migrate (runs migrations + seed, exits 0)
+#                 → api (healthy) → web.
+# Configuration comes from .env (copy .env.example); no secrets in this file.
+
+x-db-url: &db-url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
+
+x-api-env: &api-env
+  NODE_ENV: production
+  DATABASE_URL: *db-url
+  JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  WEB_ORIGIN: http://localhost:${WEB_PORT:-8088}
+  COOKIE_SECURE: ${COOKIE_SECURE:-false}
+  # Requests arrive through nginx; use X-Forwarded-For as the client IP.
+  TRUST_PROXY: 'true'
+
 services:
   db:
     image: postgres:17-alpine
@@ -17,6 +36,54 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # One-off job: apply pending migrations, then import the supplied CSVs.
+  # Both steps are idempotent, so it is safe on every start.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: finpilot-api:local
+    command:
+      - sh
+      - -c
+      - >-
+        node_modules/.bin/dbmate --migrations-dir db/migrations --no-dump-schema --wait up &&
+        node dist/seed/seed.js
+    environment:
+      <<: *api-env
+      SEED_DATA_DIR: /app/data/raw
+      SEED_VIEWER_PASSWORD: ${SEED_VIEWER_PASSWORD:?set in .env}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?set in .env}
+    healthcheck:
+      disable: true
+    restart: 'no'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    image: finpilot-api:local
+    restart: unless-stopped
+    environment: *api-env
+    # Not published: reachable only through the web container (same origin).
+    expose:
+      - '3000'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: finpilot-web:local
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${WEB_PORT:-8088}:8080'
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   pgdata:

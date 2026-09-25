@@ -4,6 +4,17 @@ import { NotFoundPage, RouteError } from '../components/layout/RouteError';
 import { LoginPage } from '../features/auth/LoginPage';
 import { RequireAuth } from '../features/auth/RequireAuth';
 import { CustomerSearchPage } from '../features/customers/CustomerSearchPage';
+import { Skeleton } from '../components/ui';
+
+/** Shown while a lazily loaded page's code downloads on first visit. */
+function PageLoading() {
+  return (
+    <div className="mx-auto max-w-6xl space-y-4 p-8" aria-busy="true" aria-label="Loading">
+      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-40 w-full rounded-xl" />
+    </div>
+  );
+}
 
 // Customer pages are code-split: the charting library and page code download
 // only when a customer is opened, keeping the login and search screens light.
@@ -12,6 +23,7 @@ export const router = createBrowserRouter([
   {
     element: <RequireAuth />,
     errorElement: <RouteError />,
+    hydrateFallbackElement: <PageLoading />,
     children: [
       {
         element: <AppShell />,

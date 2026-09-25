@@ -14,13 +14,17 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm -r test",
-    "db:up": "docker compose up -d db",
+    "db:up": "docker compose up -d --wait db",
     "db:down": "docker compose down",
     "db:migrate": "pnpm --filter @finpilot/api db:migrate",
     "db:rollback": "pnpm --filter @finpilot/api db:rollback",
     "db:seed": "pnpm --filter @finpilot/api db:seed",
     "db:codegen": "pnpm --filter @finpilot/api db:codegen",
-    "db:reset": "docker compose down -v && docker compose up -d --wait db && pnpm db:migrate && pnpm db:seed"
+    "db:reset": "docker compose down -v && docker compose up -d --wait db && pnpm db:migrate && pnpm db:seed",
+    "stack:up": "docker compose up --build -d --wait",
+    "stack:down": "docker compose down",
+    "stack:logs": "docker compose logs -f api web",
+    "stack:smoke": "scripts/smoke-test.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
