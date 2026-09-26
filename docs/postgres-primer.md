@@ -122,3 +122,26 @@ CREATE POLICY advisor_sees_own_customers ON customers
 
 Every query, including the views, would then return only that advisor's
 rows, even if an endpoint forgot to filter: defence in depth behind the API.
+
+## Index types: composite, partial, expression
+
+An index is like the index at the back of a book: a sorted lookup that lets
+PostgreSQL jump to matching rows instead of scanning the whole table.
+
+| Type           | What it indexes              | FinPilot example                                                       | Use it when                                                    |
+| -------------- | ---------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **Composite**  | Several columns, in order    | `transactions (account_id, trade_date DESC, transaction_id DESC)`      | Queries filter and sort by the same columns together           |
+| **Partial**    | Only rows matching a `WHERE` | `transactions (account_id, trade_date DESC) WHERE status <> 'SETTLED'` | You often search a small subset (~5% of rows here)             |
+| **Expression** | A computed value             | `UNIQUE customers (lower(email))`                                      | Queries search on a transformed value (case-insensitive email) |
+
+- **Composite:** like a phone book sorted by surname then first name. The
+  transactions screen asks for one account's rows in a date range, newest
+  first, which is exactly the index order, so rows come out pre-sorted.
+  Only queries using the **leading** column(s) benefit.
+- **Partial:** smaller and cheaper to maintain than indexing every row; the
+  query's condition must imply the index's `WHERE`.
+- **Expression:** the query must use the same expression (`lower(email)`),
+  or the index is not used. As a `UNIQUE` index it also makes uniqueness
+  case-insensitive.
+
+All three can be combined: the partial index above is also composite.
