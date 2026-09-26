@@ -87,3 +87,38 @@ rather than indexing every column.
 | CHECK constraints | ✅        | ✅ (via SQL migrations) | ⚠️ partial | ❌ raw SQL only |
 | Views             | ✅        | ✅ queried as tables    | ⚠️ partial | ❌ limited      |
 | Partial indexes   | ✅        | ✅ (via SQL migrations) | ⚠️ partial | ❌ raw SQL only |
+
+## Constraints vs row-level security (RLS)
+
+They solve different problems:
+
+|          | Constraints (used)      | Row-level security (not used)             |
+| -------- | ----------------------- | ----------------------------------------- |
+| Question | Is this data **valid**? | May this user **see or change** this row? |
+| Scope    | Every writer, every row | Per database role / session               |
+| Example  | `CHECK (amount > 0)`    | "an advisor sees only their customers"    |
+
+**How FinPilot controls access instead:** in the API. No valid session
+cookie → 401; a VIEWER calling an admin route → 403
+(`app.requireRole('ADMIN')`); customer sub-resources join through
+`accounts.customer_id`, so another customer's `accountId` returns nothing.
+The API connects as one database user, so PostgreSQL does not know which
+person is signed in.
+
+**Why no RLS:** every staff user may see every customer, and the only role
+difference (import) is a whole feature, not a subset of rows; enforcing it
+once in the API is simpler to test and explain.
+
+**When RLS would be added:** per-advisor books of customers, multi-tenant
+data, or clients that reach the database directly. Sketch:
+
+```sql
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY advisor_sees_own_customers ON customers
+  FOR SELECT USING (advisor_id = current_setting('app.user_id')::bigint);
+-- per request, inside the transaction:
+-- SET LOCAL app.user_id = '<signed-in user id>';
+```
+
+Every query, including the views, would then return only that advisor's
+rows, even if an endpoint forgot to filter: defence in depth behind the API.
