@@ -188,7 +188,7 @@ const titlePage = [
     [
       ['Author', 'rogerantony-dev'],
       ['Date', '25 September 2026'],
-      ['Repository', 'github.com/rogerantony-dev/finpilot (private)'],
+      ['Repository', 'github.com/rogerantony-dev/finpilot'],
       [
         'Stack',
         'React 19 + Vite · Fastify 5 + Zod · Kysely · PostgreSQL 17 · Docker Compose · GitHub Actions',

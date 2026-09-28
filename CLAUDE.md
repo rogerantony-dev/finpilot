@@ -1,7 +1,7 @@
 # FinPilot — project guide
 
 Internal investment portfolio & goal monitoring app, built for the FinPilot
-full-stack assessment. Synthetic data only. Brief: `docs/assignment-brief.docx`.
+full-stack assessment. Synthetic data only. Brief: `docs/assignment-brief.docx` (local only, not committed).
 Decisions and rationale: `DECISIONS.md`. Data anomalies: `docs/data-audit.md`.
 
 The author must explain and live-edit this code in a review interview:
@@ -106,7 +106,7 @@ declaring work done; CI (`.github/workflows/ci.yml`) runs the same checks plus a
 migration rollback check and `kysely-codegen --verify`, so run `pnpm db:codegen`
 after any migration.
 
-Remote: https://github.com/rogerantony-dev/finpilot (private), branch `main`.
+Remote: https://github.com/rogerantony-dev/finpilot (public), branch `main`.
 
 ## Conventions
 

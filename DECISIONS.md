@@ -298,8 +298,9 @@ constraints, views and partial indexes are and how FinPilot uses them.
   add a job on `main` that builds and pushes versioned images, runs
   migrations as a separate one-off step, then rolls out; see the architecture
   report.
-- **Not used:** CodeQL (SAST) requires GitHub Advanced Security on private
-  repositories; the dependency audit and Dependabot cover supply-chain risk.
+- **Not used:** CodeQL (SAST) was not set up while the repository was private (it needs
+  GitHub Advanced Security there); the dependency audit and Dependabot cover
+  supply-chain risk. Now that the repository is public, CodeQL is free to add.
 
 ---
 

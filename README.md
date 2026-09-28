@@ -37,11 +37,11 @@ docs/           Architecture report, diagrams, data audit, SQL tasks, primers
 
 | Deliverable                         | Where                                                                                                                                                  |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Repository                          | https://github.com/rogerantony-dev/finpilot (private: access by GitHub collaborator invite)                                                            |
+| Repository                          | https://github.com/rogerantony-dev/finpilot                                                                                                            |
 | Run locally                         | [Quick start](#quick-start-one-command): `docker compose up --build` → http://localhost:8088                                                           |
 | Demo users                          | [Demo users](#demo-users): `viewer@finpilot.test`, `admin@finpilot.test`                                                                               |
 | API docs                            | http://localhost:8088/api/docs (OpenAPI JSON at `/api/docs/json`)                                                                                      |
-| Architecture report                 | [PDF](docs/architecture-report.pdf) · [Word](docs/architecture-report.docx)                                                                            |
+| Architecture report                 | [PDF](docs/architecture-report.pdf) · [Word](docs/architecture-report.docx) (10 pages + appendices)                                                    |
 | Decisions, assumptions, limitations | [DECISIONS.md](DECISIONS.md)                                                                                                                           |
 | Data anomalies and handling         | [docs/data-audit.md](docs/data-audit.md)                                                                                                               |
 | SQL tasks and `EXPLAIN`             | [docs/sql-tasks.md](docs/sql-tasks.md)                                                                                                                 |
