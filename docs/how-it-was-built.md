@@ -1,8 +1,8 @@
 # How FinPilot was built, feature by feature
 
 A walkthrough in build order. For each feature: **what it does**, **how it
-works** (database → API → screen), **where the code is**, **why it was built
-that way**, and **the interview question it answers**.
+works** (database → API → screen), **where the code is** and **why it was
+built that way**.
 
 ---
 
@@ -36,13 +36,11 @@ numbers and cross-file consistency. Findings: 7 planted anomalies (duplicate
 3 duplicate holdings) plus data-generation artefacts (1,069 trades before
 the account opened; transactions don't add up to holdings).
 
-**Where:** `docs/data-audit.md`.
+**Where:** `docs/data-audit.md`: every anomaly and whether it was rejected,
+de-duplicated or reported, and why.
 
 **Why:** the brief grades anomaly handling; knowing the data first decided
 the schema (constraints) and the import rules (reject vs report).
-
-**Interview:** _"What was wrong with the data and what did you do?"_ →
-the table in `docs/data-audit.md`: rejected, de-duplicated, or reported, and why.
 
 ---
 
@@ -71,10 +69,10 @@ exact `NUMERIC`, never floats. Each migration has an `up` and a `down`.
 partial indexes are first-class and visible; queries read like SQL
 (`DECISIONS.md` D2, `docs/postgres-primer.md`).
 
-**Interview:** _"How do you roll back a migration?"_ → `pnpm db:rollback`;
-each file has a `down`; CI rolls all four back to an empty schema and
-re-applies on every push. _"Why not fix the old migration?"_ → never edit an
-applied migration; the P/L fix is a new file (0400).
+**Rollback:** `pnpm db:rollback` reverts one migration using its `down`; CI
+rolls all four back to an empty schema and re-applies them on every push.
+Applied migrations are never edited, which is why the P/L fix is a new file
+(0400).
 
 ---
 
@@ -108,9 +106,8 @@ import-service.ts); seed: `apps/api/src/seed/seed.ts`; tests:
 **Result on the supplied data:** transactions 4,550 accepted / 4 rejected;
 holdings 982 / 3; everything else 100%. Re-running the seed changes nothing.
 
-**Interview:** _"Show how a bad row is rejected"_ → upload
-`data/samples/transactions_with_errors.csv` (4 accepted, 13 rejected, one of
-each rule), then `SELECT * FROM import_rejects`.
+**Try it:** upload `data/samples/transactions_with_errors.csv` (4 accepted,
+13 rejected, one of each rule); the reasons are stored in `import_rejects`.
 
 ---
 
@@ -141,7 +138,7 @@ explained field by field in `docs/database-guide.md`.
 disagree), no N+1 queries, and the brief asks for aggregation outside the
 browser and at least one useful view.
 
-**Interview:** _"Explain one non-trivial query"_ → `v_asset_allocation`:
+**Example:** in `v_asset_allocation`,
 `sum(sum(market_value)) OVER (PARTITION BY customer_id)` computes each
 customer's total in the same pass as the per-class sums.
 
@@ -164,9 +161,9 @@ customer's total in the same pass as the per-class sums.
 - **Swagger:** generated at `/api/docs` from the same schemas.
 - **Config:** environment variables validated at start-up (`config.ts`).
 
-**Interview:** _"Trace a request"_ → request ID assigned → auth check → Zod
-validation → service → Kysely query → response validated against its schema
-→ logged with the same ID.
+**Request path:** request ID assigned → auth check → Zod validation →
+service → Kysely query → response validated against its schema → logged with
+the same ID.
 
 ---
 
@@ -194,8 +191,8 @@ validation → service → Kysely query → response validated against its schem
 **Why a cookie, not localStorage:** JavaScript can't read an httpOnly cookie,
 so an XSS bug can't steal the session (`DECISIONS.md` D8).
 
-**Interview:** _"What's the security risk you'd fix next?"_ → stateless JWT
-can't be revoked before expiry → short-lived tokens + refresh, or server sessions.
+**Known limitation:** a stateless JWT can't be revoked before it expires;
+production would use short-lived tokens with refresh, or server-side sessions.
 
 ---
 
@@ -216,8 +213,8 @@ can't be revoked before expiry → short-lived tokens + refresh, or server sessi
   next loads. Clicking anywhere in a row opens the customer; the name stays a
   real link for keyboard and cmd-click.
 
-**Interview:** _"Is filtering done in the browser?"_ → no: server-side
-filtering and pagination; the browser only holds one page.
+**Why server-side:** filtering and pagination happen in PostgreSQL; the
+browser only ever holds one page.
 
 ---
 
@@ -248,9 +245,9 @@ goals needing attention.
   donut (Recharts) is decorative for screen readers; the table next to it
   carries the same numbers. Chart code is lazy-loaded with this page only.
 
-**Interview:** _"How do you know the numbers are right?"_ → the book total
-was cross-checked against an independent calculation from the raw CSVs, and
-tests assert cost + P/L = value at every level.
+**Verification:** the book total was cross-checked against an independent
+calculation from the raw CSVs, and tests assert cost + P/L = value at every
+level.
 
 ---
 
@@ -281,8 +278,6 @@ pagination; pending and reversed stand out.
 - **Web:** `TransactionsPage.tsx`; filters in the URL with pills; an inverted
   date range is caught before any request.
 
-**Interview:** _"Show an EXPLAIN"_ → `docs/sql-tasks.md`.
-
 ---
 
 ## 12 · Goals: create and edit
@@ -299,8 +294,8 @@ pagination; pending and reversed stand out.
   sending, shows server errors under the right field, and PATCHes **only the
   fields that changed**. The list refreshes and a toast confirms.
 
-**Interview:** _"Trace a goal update to the database"_ → the goal-update
-sequence diagram (report §6.3).
+**Where:** `modules/goals/`; `apps/web/src/features/goals/`; the goal-update
+sequence diagram is in the architecture report (§6.3).
 
 ---
 
@@ -319,8 +314,8 @@ reason for every rejected row, download rejects, see history.
   progress bar, results, rejects table with the original row, CSV download,
   history with a dialog per batch. Route and menu are admin-only.
 
-**Interview:** _"What stops duplicate loads?"_ → the file fingerprint
-(unique per dataset) and the primary key on `transaction_id`.
+**Duplicate loads** are stopped by the file fingerprint (unique per dataset)
+and the primary key on `transaction_id`.
 
 ---
 

@@ -4,8 +4,7 @@ Internal investment portfolio & goal monitoring app, built for the FinPilot
 full-stack assessment. Synthetic data only. Brief: `docs/assignment-brief.docx` (local only, not committed).
 Decisions and rationale: `DECISIONS.md`. Data anomalies: `docs/data-audit.md`.
 
-The author must explain and live-edit this code in a review interview:
-**prefer readable, explainable code over clever code.**
+**Prefer readable, explainable code over clever code.**
 
 ## Requirements (from the brief)
 
@@ -52,8 +51,8 @@ import):
 - `transactions.csv` must import as **4,550 accepted / 4 rejected**.
 
 **PostgreSQL.** Explicit schema via migrations: PKs, FKs, NOT NULL, UNIQUE,
-CHECK. Indexes from real query patterns (be ready to show
-`EXPLAIN (ANALYZE, BUFFERS)`). Parameterised queries only. Transactions for
+CHECK. Indexes from real query patterns (backed by `EXPLAIN (ANALYZE, BUFFERS)`
+in `docs/sql-tasks.md`). Parameterised queries only. Transactions for
 multi-step writes. At least one aggregation view. Must support the SQL tasks:
 top 10 customers by AUM, allocation per customer and overall, monthly BUY/SELL
 net flow (12 months), top instruments by distinct holders, HIGH-priority goals
