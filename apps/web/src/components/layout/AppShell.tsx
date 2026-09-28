@@ -26,7 +26,7 @@ function NavItem({
 }) {
   return (
     <NavLink to={to} end={end} className={navItemClass}>
-      <span className="flex size-[18px] items-center justify-center text-gray-700">{icon}</span>
+      <span className="flex size-4.5 items-center justify-center text-gray-700">{icon}</span>
       {children}
     </NavLink>
   );
@@ -53,7 +53,7 @@ export function AppShell() {
         Skip to content
       </a>
 
-      <aside className="flex shrink-0 flex-col border-b border-gray-alpha-100 bg-gray-0 lg:sticky lg:top-0 lg:h-dvh lg:w-[246px] lg:border-r lg:border-b-0">
+      <aside className="flex shrink-0 flex-col border-b border-gray-alpha-100 bg-gray-0 lg:sticky lg:top-0 lg:h-dvh lg:w-61.5 lg:border-r lg:border-b-0">
         <div className="flex items-center gap-2 px-4 pt-4 pb-3">
           <span
             aria-hidden
@@ -121,7 +121,7 @@ export function AppShell() {
       </aside>
 
       <main id="main" className="min-w-0 flex-1">
-        <div className="mx-auto max-w-[1120px] px-5 py-6 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-280 px-5 py-6 lg:px-8 lg:py-8">
           <Outlet />
         </div>
       </main>

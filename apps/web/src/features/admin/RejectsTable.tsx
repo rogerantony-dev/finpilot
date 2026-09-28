@@ -13,7 +13,7 @@ export function RejectsTable({ rows, caption }: { rows: RejectedRow[]; caption: 
           </Th>
           <Th className="w-32">Record</Th>
           <Th>Why it was rejected</Th>
-          <Th className="w-28">Original row</Th>
+          <Th className="w-72">Original row</Th>
         </tr>
       </thead>
       <tbody>
@@ -40,7 +40,7 @@ export function RejectsTable({ rows, caption }: { rows: RejectedRow[]; caption: 
                   {Object.entries(r.raw).map(([k, v]) => (
                     <div key={k} className="contents">
                       <dt className="text-gray-500">{k}</dt>
-                      <dd className="break-all">
+                      <dd className="break-words">
                         {v === '' ? <em className="text-loss">empty</em> : v}
                       </dd>
                     </div>

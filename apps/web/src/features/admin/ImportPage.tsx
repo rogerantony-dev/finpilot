@@ -57,6 +57,11 @@ export function ImportPage() {
 
   function clear() {
     importer.reset();
+    clearFile();
+  }
+
+  // Keeps the import result on screen; only the chosen file goes away.
+  function clearFile() {
     setSelected(null);
     setFileError(null);
     if (inputRef.current) inputRef.current.value = '';
@@ -132,8 +137,8 @@ export function ImportPage() {
                 <X size={14} aria-hidden /> Remove
               </Button>
               <Button
-                onClick={() => importer.mutate(selected)}
-                disabled={importer.isPending || importer.isSuccess}
+                onClick={() => importer.mutate(selected, { onSuccess: clearFile })}
+                disabled={importer.isPending}
               >
                 {importer.isPending ? 'Importing…' : 'Validate & import'}
               </Button>
