@@ -13,7 +13,7 @@
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@finpilot/shared": "workspace:*",
-    "@tanstack/react-query": "^5.103.2",
+    "@tanstack/react-query": "^5.104.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.48.0",
     "react": "^19.3.0",
@@ -33,6 +33,6 @@
     "jsdom": "^30.1.1",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.1",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.2"
   }
 }
